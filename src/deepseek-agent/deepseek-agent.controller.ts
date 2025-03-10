@@ -6,12 +6,7 @@ export class DeepseekAgentController {
   constructor(private readonly deepseekService: DeepseekAgentService) {}
 
   @Post('chat')
-  async chat(@Body('message') message: string) {
-    return this.deepseekService.chatWithDeepSeek(message);
-  }
-
-  @Get()
-  async test() {
-    return "hey welcome"
+  async chat(@Body('tx') tx: string) {
+    return this.deepseekService.chatWithDeepSeek(JSON.stringify(tx));
   }
 }
