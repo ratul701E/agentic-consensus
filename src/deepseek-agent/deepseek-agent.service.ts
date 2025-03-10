@@ -27,7 +27,7 @@ export class DeepseekAgentService {
                 model: "deepseek/deepseek-r1:free",
                 messages: [
                     { role: 'system', content: systemMessage },
-                    { role: 'user', content: "not this is a tx you have to valid. " + userMessage }
+                    { role: 'user', content: "this is a tx you have to valid. " + userMessage }
                 ],
             });
             console.log("Requst completed.....");

@@ -15,7 +15,7 @@ export class OpenaiAgentService {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "cognitivecomputations/dolphin3.0-r1-mistral-24b:free",
+          model: "google/gemini-2.0-flash-lite-preview-02-05:free",
           messages: [{ role: "user", content: prompt }],
           temperature: 0.7
         })
