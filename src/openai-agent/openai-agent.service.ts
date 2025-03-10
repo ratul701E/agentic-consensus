@@ -1,38 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import OpenAI from 'openai';
 
 @Injectable()
 export class OpenaiAgentService {
-  private readonly openaiUrl = 'https://openrouter.ai/api/v1/chat/completions';
-   private readonly apiKey = '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';
+    private openai: OpenAI;
 
-  async generateText(prompt: string): Promise<string> {
-    try {
-      const response = await fetch(this.openaiUrl, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.0-flash-lite-preview-02-05:free",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7
-        })
-      });
+    constructor(private configService: ConfigService) {
+        const apiKey = this.configService.get<string>("GEMINI_API_KEY");
 
-      if (!response.ok) {
-        throw new Error('Failed to generate text from OpenAI');
-      }
+        if (!apiKey) {
+            throw new Error('GEMINI_API_KEY is missing or empty.');
+        }
 
-      const data = await response.json();
-      return data.choices[0].message.content;
-    } catch (error) {
-      console.error('Error communicating with OpenAI:', error);
-      throw new Error('Failed to generate text from OpenAI');
+        this.openai = new OpenAI({
+            baseURL: "https://openrouter.ai/api/v1",
+            apiKey,
+        });
     }
-  }
 
-  get():string {
-    return "Hello Tanvir!";
-  }
+    async generateText(prompt: string): Promise<string> {
+        try {
+            console.log(`Generating text for prompt: ${prompt}`);
+            const completion = await this.openai.chat.completions.create({
+                model: "google/gemini-2.0-flash-lite-preview-02-05:free",
+                messages: [{ role: "user", content: prompt }]
+            });
+
+            console.log("Response received.");
+            return completion.choices[0]?.message?.content || 'No response from OpenAI.';
+        } catch (error) {
+            console.error('OpenAI API Error:', error);
+            throw new Error('Failed to generate response');
+        }
+    }
+
+    get(): string {
+        return "Hello Tanvir!";
+    }
 }
