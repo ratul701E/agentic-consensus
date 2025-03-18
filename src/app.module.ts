@@ -7,6 +7,7 @@ import { OpenaiAgentModule } from './openai-agent/openai-agent.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TestModule } from './test/test.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { ChainModule } from './chain/chain.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { TransactionModule } from './transaction/transaction.module';
     MongooseModule.forRoot(process.env.MONGO_URI),
     TestModule,
     TransactionModule,
+    ChainModule,
   ],
   controllers: [AppController],
   providers: [AppService],

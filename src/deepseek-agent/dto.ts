@@ -9,7 +9,7 @@ export type LlamaResponse = {
     created_at: string;
     message: {
       role: string;
-      content: string;
+      content: any;
     };
     done_reason: string;
     done: boolean;

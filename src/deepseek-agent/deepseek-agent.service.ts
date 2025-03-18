@@ -4,17 +4,17 @@ import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { whoIAm } from 'src/contexts/test';
 import { TransactionDocument } from 'src/schema/transaction.schema';
-import { LlamaResponse, Tx } from './dto';
+import { Tx } from './dto';
 import { TransactionService } from 'src/transaction/transaction.service';
-import axios from 'axios';
+import { LLM } from 'src/Class/LLM';
 
 @Injectable()
 export class DeepseekAgentService {
     private openai: OpenAI;
-
+    private readonly llm;
     constructor(
         private configService: ConfigService,
-        private readonly transactionService: TransactionService
+        private readonly transactionService: TransactionService,
     ) {
         const apiKey = this.configService.get<string>("DEEPSEEK_API_KEY");
 
@@ -26,54 +26,15 @@ export class DeepseekAgentService {
             baseURL: "https://openrouter.ai/api/v1",
             apiKey,
         });
+
+        this.llm = new LLM();
     }
 
-    async chatWithDeepSeek(transaction: Tx, systemMessage = whoIAm) {
-        const transactions = await this.transactionService.getWhereKeyExist(transaction.sender);
-        const balance = await this.transactionService.getUserBalanceByKey(transaction.sender);
-        const userMessage = this.prepareUserMessage(transaction);
-        const assistantMessage = this.prepareAssistantMessage(transactions, balance);
+    async chatWithDeepSeek(transaction: Tx) {
 
-        const res = await axios.post('http://localhost:11434/api/chat', {
-            "model": "llama3.2",
-            "messages": [
-                { "role": "system", "content": systemMessage },
-                { "role": "assistant", "content": assistantMessage },
-                { "role": "user", "content": userMessage }
-            ],
-            "stream": false,
-            "format": {
-                "type": "object",
-                "properties": {
-                    "decision": {
-                        "type": "string",
-                        "enum": ["yes", "no"]
-                    },
-                    "justification": {
-                        "type": "string"
-                    },
-                    "txMetadata": {
-                        "type": "object",
-                        "properties": {
-                            "sender_balance": {
-                                "type": "number"
-                            },
-                            "requested_amount": {
-                                "type": "number"
-                            },
-                            "status": {
-                                "type": "string",
-                                "enum": ["approved", "rejected"]  
-                            }
-                        },
-                        "required": ["sender_balance", "requested_amount", "status"]
-                    }
-                },
-                "required": ["decision", "justification", "txMetadata"]
-            }
-        }
-        )
-        const response = res.data as LlamaResponse;
+        const { userMessage, assistantMessage, systemMessage } = await this.getChatContent(transaction);
+
+        const response = await this.llm.gossip(systemMessage, assistantMessage, userMessage);
         return JSON.parse(response.message.content);
         //return transactions;
         // try {
@@ -99,6 +60,21 @@ export class DeepseekAgentService {
         //     console.error('DeepSeek API Error:', error);
         //     throw new Error('Failed to generate response');
         // }
+    }
+
+    async getChatContent(transaction: Tx) {
+        const transactions = await this.transactionService.getWhereKeyExist(transaction.sender);
+        const balance = await this.transactionService.getUserBalanceByKey(transaction.sender);
+        const userMessage = this.prepareUserMessage(transaction);
+        const assistantMessage = this.prepareAssistantMessage(transactions, balance);
+
+        return {
+            transactions,
+            balance,
+            userMessage,
+            assistantMessage,
+            systemMessage: whoIAm
+        }
     }
 
 

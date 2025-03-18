@@ -3,6 +3,7 @@ import { DeepseekAgentService } from './deepseek-agent.service';
 import { DeepseekAgentController } from './deepseek-agent.controller';
 import { ConfigModule } from '@nestjs/config';
 import { TransactionModule } from 'src/transaction/transaction.module';
+import { LLM } from 'src/Class/LLM';
 
 @Module({
   controllers: [DeepseekAgentController],
@@ -10,6 +11,8 @@ import { TransactionModule } from 'src/transaction/transaction.module';
   imports: [
     ConfigModule,
     TransactionModule,
-  ]
+    LLM
+  ],
+  exports: [DeepseekAgentService]
 })
 export class DeepseekAgentModule { }
