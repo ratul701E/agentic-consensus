@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TestModule } from './test/test.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { ChainModule } from './chain/chain.module';
+import { LlmModule } from './llm/llm.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ChainModule } from './chain/chain.module';
     TestModule,
     TransactionModule,
     ChainModule,
+    LlmModule
   ],
   controllers: [AppController],
   providers: [AppService],
