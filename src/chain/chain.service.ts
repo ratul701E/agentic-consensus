@@ -1,11 +1,11 @@
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LLM } from 'src/Class/LLM';
 import { DeepseekAgentService } from 'src/deepseek-agent/deepseek-agent.service';
-import { LlamaResponse } from 'src/deepseek-agent/dto';
+import { LlamaResponse, Tx } from 'src/deepseek-agent/dto';
 import { TransactionService } from 'src/transaction/transaction.service';
 
 @Injectable()
-export class ChainService implements OnApplicationBootstrap {
+export class ChainService {
 
     constructor(
         private readonly transactionService: TransactionService,
@@ -13,7 +13,12 @@ export class ChainService implements OnApplicationBootstrap {
     ) { }
 
 
-    async onApplicationBootstrap() {
+    async registerTransaction(tx: Tx) {
+        this.startConsensus(tx);
+    }
+
+
+    async startConsensus(tx: Tx) {
         const llms = Array.from({ length: 100 }, () => new LLM());
 
         // llms.forEach((llm, index) => llm.greet(index+1)); 
@@ -41,25 +46,20 @@ export class ChainService implements OnApplicationBootstrap {
 
         console.log("Lead Miner: ", lead_miner);
         console.log("Oridinary Miners: ", miners);
-        console.log("validators: ", validators);
+        console.log("🧑‍🏭 Validators: ", validators);
 
         //validation
+        const startTime = Date.now();
         await Promise.all(validators.map(async (llm) => {
-            console.log(`${llm.getId()} is validating the transaction ⌛`);
-            const { userMessage, assistantMessage, systemMessage } = await this.deepseekService.getChatContent({
-                "sender": "0x000rafi",
-                "receiver": "0x000ratul",
-                "amount": "140"
-            });
+            console.log(`🧑‍🏭 ${llm.getId()} is validating the transaction... 🕛\n`);
+            const { userMessage, assistantMessage, systemMessage } = await this.deepseekService.getChatContent(tx);
 
             const response: LlamaResponse = await llm.gossip(systemMessage, assistantMessage, userMessage);
             const responseJson = JSON.parse(response.message.content)
-            console.log(`${llm.getId()} has validated the transaction. Response: {decision: ${responseJson.decision} ${responseJson.decision === "yes" ? "✅" : "❌"}, justification: ${responseJson.justification}}\n`);
+            console.log(`🧑‍🏭 ${llm.getId()} has validated the transaction. Response: {decision: ${responseJson.decision} ${responseJson.decision === "yes" ? "✅" : "❌"}, justification: ${responseJson.justification}}\n`);
         }));
-
-
-
+        const endTime = Date.now();
+        console.log(`🕛 Time taken for validate transaction(s) by validators: ${endTime - startTime} ms`)
     }
 
 }
- 
