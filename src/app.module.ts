@@ -9,6 +9,9 @@ import { TestModule } from './test/test.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { ChainModule } from './chain/chain.module';
 import { RagModule } from './rag/rag.module';
+import { P2pClientModule } from './p2p-client/p2p-client.module';
+import { DatabaseModule } from './database/database.module';
+import { P2pServerModule } from './p2p-server/p2p-server.module';
 
 @Module({
   imports: [
@@ -19,7 +22,10 @@ import { RagModule } from './rag/rag.module';
     TestModule,
     TransactionModule,
     ChainModule,
-    RagModule
+    RagModule,
+    P2pServerModule,
+    P2pClientModule,
+    DatabaseModule
   ],
   controllers: [AppController],
   providers: [AppService],
