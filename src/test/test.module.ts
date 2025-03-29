@@ -3,7 +3,7 @@ import { TestService } from './test.service';
 import { TestController } from './test.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
-import { TestSchema } from 'src/schema/test.schema';
+import { TestSchema } from 'src/schemas/test.schema';
 
 @Module({
   controllers: [TestController],
