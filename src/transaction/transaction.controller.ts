@@ -1,7 +1,6 @@
 import { Controller, Post, Get, Body, Delete, Param } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
-import { promises } from 'dns';
 
 @Controller('transaction')
 export class TransactionController {

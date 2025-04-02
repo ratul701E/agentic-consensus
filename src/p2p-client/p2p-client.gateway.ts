@@ -2,9 +2,7 @@ import { TransactionDTO } from '../dtos/transaction.dto';
 import { OnGatewayInit, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { P2pClientService } from './p2p-client.service';
 import { io } from 'socket.io-client';
-import axios from 'axios'
 import { Server } from 'socket.io';
-import { BlockDTO } from 'src/dtos/block.dto';
 import { getLocalIp } from 'src/main';
 import { TransactionService } from 'src/transaction/transaction.service';
 
@@ -16,7 +14,7 @@ export class P2pClientGateway implements OnGatewayInit {
 
   constructor(private readonly p2pClientService: P2pClientService, private readonly transacationService: TransactionService) {}
 
-  async afterInit(server: any) {
+  async afterInit() {
 
     await this.connectToSeedServers()
     //await this.getNodeAddressFromSeedServer()
