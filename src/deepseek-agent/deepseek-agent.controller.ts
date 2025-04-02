@@ -6,8 +6,8 @@ import { Tx } from './dto';
 export class DeepseekAgentController {
   constructor(private readonly deepseekService: DeepseekAgentService) { }
 
-  @Post('chat')
-  async chat(@Body() tx: Tx) {
-    return this.deepseekService.chatWithDeepSeek(tx);
-  }
+  // @Post('chat')
+  // async chat(@Body() tx: Tx) {
+  //   return this.deepseekService.chatWithDeepSeek(tx);
+  // }
 }

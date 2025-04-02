@@ -6,8 +6,8 @@ import { Tx } from 'src/deepseek-agent/dto';
 export class ChainController {
   constructor(private readonly chainService: ChainService) {}
 
-  @Post('')
-    async chat(@Body() tx: Tx) {
-      return this.chainService.registerTransaction(tx);
-    }
+  // @Post('')
+  //   async chat(@Body() tx: Tx) {
+  //     return this.chainService.registerTransaction(tx);
+  //   }
 }
