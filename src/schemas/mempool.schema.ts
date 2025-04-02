@@ -6,16 +6,37 @@ export type MempoolDocument = HydratedDocument<Mempool>;
 @Schema({ timestamps: true })
 export class Mempool {
   @Prop({ required: true })
-  sender: string;
+  status: string; // "success", "pending", etc.
 
   @Prop({ required: true })
-  receiver: string;
+  block: number; // Block number the transaction is in
 
   @Prop({ required: true })
-  amount: number;
+  timestamp: Date; // Time of the transaction
 
-  @Prop({ default: 'pending' })
-  status: string; // e.g., "pending", "confirmed"
+  @Prop({ required: true })
+  transactionAction: string; // Description of the transaction
+
+  @Prop({ required: true })
+  from: string; // Sender's public key
+
+  @Prop({ required: true })
+  to: string; // Receiver's public key
+
+  @Prop({ required: true })
+  value: number; // Amount transferred
+
+  @Prop({ required: true })
+  transactionFee: number; // Fee for processing
+
+  @Prop({ required: true })
+  gasPrice: number; // Gas price for the transaction
+
+  @Prop({ required: true, unique: true })
+  transactionHash: string; // Unique identifier for the transaction
+
+  @Prop({ required: true })
+  signature: string; // Digital signature
 }
 
 export const MempoolSchema = SchemaFactory.createForClass(Mempool);

@@ -12,6 +12,8 @@ import { RagModule } from './rag/rag.module';
 import { P2pClientModule } from './p2p-client/p2p-client.module';
 import { DatabaseModule } from './database/database.module';
 import { P2pServerModule } from './p2p-server/p2p-server.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
+import { BlockModule } from './block/block.module';
 
 @Module({
   imports: [
@@ -25,7 +27,9 @@ import { P2pServerModule } from './p2p-server/p2p-server.module';
     RagModule,
     P2pServerModule,
     P2pClientModule,
-    DatabaseModule
+    DatabaseModule,
+    BlockchainModule,
+    BlockModule,
   ],
   controllers: [AppController],
   providers: [AppService],
