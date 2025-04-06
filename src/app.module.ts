@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DeepseekAgentModule } from './modules/deepseek-agent/deepseek-agent.module';
@@ -14,6 +14,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { P2pServerModule } from './modules/p2p-server/p2p-server.module';
 import { BlockchainModule } from './modules/blockchain/blockchain.module';
 import { BlockModule } from './modules/block/block.module';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 
 @Module({
   imports: [
@@ -34,4 +35,8 @@ import { BlockModule } from './modules/block/block.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

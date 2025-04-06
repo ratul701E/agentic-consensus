@@ -25,9 +25,9 @@ export class BlockService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    setInterval(() => {
-      this.genereateBlock();
-    }, GENERATION_DELAY);
+    // setInterval(() => {
+    //   this.genereateBlock();
+    // }, GENERATION_DELAY);
   }
 
   async genereateBlock() {

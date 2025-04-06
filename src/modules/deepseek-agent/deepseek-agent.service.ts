@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 import { TransactionDocument } from 'src/schemas/transaction.schema';
 import { Tx } from './dto';
 import { TransactionService } from 'src/modules/transaction/transaction.service';
-import { LLM } from 'src/Class/LLM';
+import { LLM } from 'src/class/LLM';
 
 @Injectable()
 export class DeepseekAgentService {
