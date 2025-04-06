@@ -2,10 +2,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { whoIAm } from 'src/contexts/test';
 import { TransactionDocument } from 'src/schemas/transaction.schema';
 import { Tx } from './dto';
-import { TransactionService } from 'src/transaction/transaction.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
 import { LLM } from 'src/Class/LLM';
 
 @Injectable()

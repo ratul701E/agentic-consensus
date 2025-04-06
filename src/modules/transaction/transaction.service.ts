@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
-import { P2pService } from 'src/p2p-server/p2p-server.service';
 import { EC } from 'elliptic';
 import * as elliptic from 'elliptic';
 import { Blockchain } from 'src/schemas/blockchain.schema';
 import { Mempool } from 'src/schemas/mempool.schema';
+import { P2pService } from '../p2p-server/p2p-server.service';
 
 @Injectable()
 export class TransactionService {

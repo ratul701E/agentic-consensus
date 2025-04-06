@@ -1,10 +1,10 @@
-import { DatabaseModule } from './../database/database.module';
 import { Module } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainController } from './blockchain.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blockchain, BlockchainSchema } from 'src/schemas/blockchain.schema';
-import { TransactionModule } from 'src/transaction/transaction.module';
+import { TransactionModule } from 'src/modules/transaction/transaction.module';
+import { DatabaseModule } from '../database/database.module';
 
 @Module({
   providers: [BlockchainService],

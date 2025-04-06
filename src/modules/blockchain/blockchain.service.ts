@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from './../database/database.service';
 import { Blockchain } from 'src/schemas/blockchain.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class BlockchainService {

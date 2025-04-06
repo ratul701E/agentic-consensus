@@ -1,12 +1,12 @@
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from 'src/modules/database/database.service';
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import crypto from "crypto";
-import { TransactionService } from "src/transaction/transaction.service";
-import { P2pClientService } from "src/p2p-client/p2p-client.service";
+import { TransactionService } from "src/modules/transaction/transaction.service";
+import { P2pClientService } from "src/modules/p2p-client/p2p-client.service";
 import axios from "axios";
-import { BlockchainService } from "src/blockchain/blockchain.service";
+import { BlockchainService } from "src/modules/blockchain/blockchain.service";
 import { getLocalIp } from "src/main";
-import { P2pGateway } from "src/p2p-server/p2p-server.gateway";
+import { P2pGateway } from "src/modules/p2p-server/p2p-server.gateway";
 
 const GENERATION_DELAY = 10000;
 const MINIMUM_TRANSACTION_PER_BLOCK = 1;

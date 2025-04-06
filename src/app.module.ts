@@ -1,19 +1,19 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DeepseekAgentModule } from './deepseek-agent/deepseek-agent.module';
+import { DeepseekAgentModule } from './modules/deepseek-agent/deepseek-agent.module';
 import { ConfigModule } from '@nestjs/config';
-import { OpenaiAgentModule } from './openai-agent/openai-agent.module';
+import { OpenaiAgentModule } from './modules/openai-agent/openai-agent.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TestModule } from './test/test.module';
-import { TransactionModule } from './transaction/transaction.module';
-import { ChainModule } from './chain/chain.module';
-import { RagModule } from './rag/rag.module';
-import { P2pClientModule } from './p2p-client/p2p-client.module';
-import { DatabaseModule } from './database/database.module';
-import { P2pServerModule } from './p2p-server/p2p-server.module';
-import { BlockchainModule } from './blockchain/blockchain.module';
-import { BlockModule } from './block/block.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { ChainModule } from './modules/chain/chain.module';
+import { RagModule } from './modules/rag/rag.module';
+import { P2pClientModule } from './modules/p2p-client/p2p-client.module';
+import { DatabaseModule } from './modules/database/database.module';
+import { P2pServerModule } from './modules/p2p-server/p2p-server.module';
+import { BlockchainModule } from './modules/blockchain/blockchain.module';
+import { BlockModule } from './modules/block/block.module';
 
 @Module({
   imports: [

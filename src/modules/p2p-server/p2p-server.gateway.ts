@@ -1,8 +1,5 @@
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { P2pService } from './p2p-server.service';
 import { Server } from 'socket.io';
-import { TransactionService } from 'src/transaction/transaction.service';
-import { Inject, forwardRef } from '@nestjs/common';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
 import { BlockDTO } from 'src/dtos/block.dto';
 
