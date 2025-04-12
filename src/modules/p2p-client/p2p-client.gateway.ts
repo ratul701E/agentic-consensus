@@ -1,10 +1,10 @@
-import { TransactionDTO } from '../dtos/transaction.dto';
 import { OnGatewayInit, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { P2pClientService } from './p2p-client.service';
 import { io } from 'socket.io-client';
 import { Server } from 'socket.io';
 import { getLocalIp } from 'src/main';
-import { TransactionService } from 'src/transaction/transaction.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
+import { TransactionDTO } from 'src/dtos/transaction.dto';
 
 @WebSocketGateway()
 export class P2pClientGateway implements OnGatewayInit {

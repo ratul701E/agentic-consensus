@@ -1,6 +1,5 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { P2pService } from './p2p-server.service';
-import { TransactionModule } from 'src/transaction/transaction.module';
 import { P2pGateway } from './p2p-server.gateway';
 
 @Module({
