@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LLM } from 'src/Class/LLM';
-import { DeepseekAgentService } from 'src/deepseek-agent/deepseek-agent.service';
-import { LlamaResponse, Tx } from 'src/deepseek-agent/dto';
-import { TransactionService } from 'src/transaction/transaction.service';
+import { DeepseekAgentService } from 'src/modules/deepseek-agent/deepseek-agent.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
 
 @Injectable()
 export class ChainService {

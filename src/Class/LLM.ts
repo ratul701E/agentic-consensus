@@ -1,6 +1,6 @@
 import axios from "axios";
 import { randomInt, randomUUID } from "crypto";
-import { LlamaResponse } from "src/deepseek-agent/dto";
+import { LlamaResponse } from "src/modules/deepseek-agent/dto";
 
 export class LLM {
 
