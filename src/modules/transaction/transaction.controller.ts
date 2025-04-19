@@ -12,7 +12,6 @@ export class TransactionController {
     async addTransactionToMempool(@Body() transaction: TransactionDTO): Promise <any> {
         //console.log(transaction)
         return await this.transactionService.addTransactionToMempool(transaction)
-
     }
 
     // @ApiOkResponse({description:"It will return the mempool"})
