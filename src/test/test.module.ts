@@ -8,9 +8,6 @@ import { TestSchema } from 'src/schemas/test.schema';
 @Module({
   controllers: [TestController],
   providers: [TestService],
-  imports: [
-    MongooseModule.forFeature([{ name: Test.name, schema: TestSchema }]),
-
-  ]
+  imports: []
 })
 export class TestModule { }

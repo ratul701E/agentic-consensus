@@ -6,7 +6,6 @@ import { Blockchain, BlockchainSchema } from 'src/schemas/blockchain.schema';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/your-database'),
     MongooseModule.forFeature([
       { name: Mempool.name, schema: MempoolSchema },
       { name: Blockchain.name, schema: BlockchainSchema },
