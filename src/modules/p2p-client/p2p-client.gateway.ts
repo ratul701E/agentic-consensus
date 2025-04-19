@@ -5,10 +5,11 @@ import { Server } from 'socket.io';
 import { getLocalIp } from 'src/main';
 import { TransactionService } from 'src/modules/transaction/transaction.service';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway()
 export class P2pClientGateway implements OnGatewayInit {
-
+  private readonly logger = new Logger(P2pClientGateway.name);
   @WebSocketServer() server: Server;
   private readonly PORT = process.env.PORT || 3000
 
@@ -31,11 +32,11 @@ export class P2pClientGateway implements OnGatewayInit {
       seedSocket.on('connect', async () => {
         this.p2pClientService.addSeedSocket(seedSocket)
         await this.getNodeAddressFromSeedServer(seedSocket)
-        console.log(`Connected to seed server [${JSON.stringify(seedAddr)}]`)
+        this.logger.log(`Connected to seed server [${JSON.stringify(seedAddr)}]`)
       })
 
       seedSocket.on('disconnect', ()=> {
-        console.log(`Disconnected from seed server [${JSON.stringify(seedAddr)}]`)
+        this.logger.warn(`Disconnected from seed server [${JSON.stringify(seedAddr)}]`)
       })
 
       seedSocket.on('new_node_addr', () => {
@@ -69,17 +70,17 @@ export class P2pClientGateway implements OnGatewayInit {
       const socket = io("http://" + addr)
       socket.on('connect', () => {
         this.p2pClientService.addSocket(socket)
-        console.log(`"Connected as a client to ${addr}"`)
+        this.logger.log(`"Connected as a client to ${addr}"`)
       })
 
       //#events
       socket.on('disconnect', () => {
-        console.log(`"Disconnected as a client from ${addr}"`)
+        this.logger.warn(`"Disconnected as a client from ${addr}"`)
       })
 
       //new transaction event
       socket.on('new_transaction', async (transaction: TransactionDTO) => { 
-        console.log(`Received transaction from server (${JSON.stringify(addr)}): ${JSON.stringify(transaction)}`)
+        this.logger.log(`Received transaction from server (${JSON.stringify(addr)}): ${JSON.parse(JSON.stringify(transaction))}`)
         //validate
         //add
         await this.transacationService.addTransactionToMempool(transaction) ? console.log("Transaction successfully added to mempool") : console.log("Transaction already exists in the mepool")
@@ -89,7 +90,7 @@ export class P2pClientGateway implements OnGatewayInit {
 
       //new block event
       socket.on('new_block', async (block: any) => {
-        console.log(`Received block from server (${JSON.stringify(addr)}): ${JSON.stringify(block)}`)
+        this.logger.log(`Received block from server (${JSON.stringify(addr)}): ${JSON.parse(JSON.stringify(block))}`)
         //validate
         //add
 
@@ -98,11 +99,11 @@ export class P2pClientGateway implements OnGatewayInit {
       })
 
       socket.on('new_node_connect', transaction => { 
-        console.log(`Broadcast: ${JSON.stringify(transaction)}`)
+        this.logger.log(`Broadcast: ${JSON.stringify(transaction)}`)
       })
 
       socket.on('node_disconnect', transaction => { 
-        console.log(`Broadcast: ${JSON.stringify(transaction)}`)
+        this.logger.log(`Broadcast: ${JSON.stringify(transaction)}`)
       })
     }
   }

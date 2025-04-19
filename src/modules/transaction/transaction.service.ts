@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
@@ -11,6 +11,7 @@ import { P2pService } from '../p2p-server/p2p-server.service';
 @Injectable()
 export class TransactionService {
     private readonly ec: EC;
+    private readonly logger = new Logger(TransactionService.name);
 
     constructor(
         private readonly p2pService: P2pService,
@@ -21,14 +22,17 @@ export class TransactionService {
     }
 
     async transactionExists(transaction: TransactionDTO): Promise<boolean> {
+        this.logger.log(`Checking if transaction ${transaction.transactionHash} exists...`);
         const existingTransaction = await this.mempoolModel.findOne({ transactionHash: transaction.transactionHash }).exec();
-        console.log(existingTransaction);
+        !!existingTransaction ? this.logger.warn("Transaction exists in mempool") : this.logger.log("Transaction does not exist")
         return !!existingTransaction;
     }
 
     async putTransaction(transaction: TransactionDTO): Promise<boolean> {
-        // await this.p2pService.transactionBroadcast(transaction);
         await this.mempoolModel.create(transaction);
+        this.logger.log(`Transaction ${transaction.transactionHash} added to mempool`);
+        await this.p2pService.transactionBroadcast(transaction);
+        this.logger.log(`Transaction ${transaction.transactionHash} broadcasted to peers`);
         return true;
     }
 
@@ -39,6 +43,11 @@ export class TransactionService {
     async deleteTransactionFromMempool(transaction: TransactionDTO): Promise<boolean> {
         const result = await this.mempoolModel.deleteOne({ transactionHash: transaction.transactionHash }).exec();
         return result.deletedCount > 0;
+    }
+
+    async deleteMultipleTransactionsFromMempool(transactions: TransactionDTO[]): Promise<boolean> {
+        const result = await this.mempoolModel.deleteMany({ transactionHash: { $in: transactions.map(tx => tx.transactionHash) } }).exec();
+        return result.deletedCount === transactions.length;
     }
 
     async printMempool() {

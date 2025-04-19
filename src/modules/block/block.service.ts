@@ -1,5 +1,5 @@
 import { DatabaseService } from 'src/modules/database/database.service';
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import crypto from "crypto";
 import { TransactionService } from "src/modules/transaction/transaction.service";
 import { P2pClientService } from "src/modules/p2p-client/p2p-client.service";
@@ -7,32 +7,24 @@ import axios from "axios";
 import { BlockchainService } from "src/modules/blockchain/blockchain.service";
 import { getLocalIp } from "src/main";
 import { P2pGateway } from "src/modules/p2p-server/p2p-server.gateway";
+import { Cron } from '@nestjs/schedule';
 
-const GENERATION_DELAY = 10000;
 const MINIMUM_TRANSACTION_PER_BLOCK = 1;
 
 @Injectable()
-export class BlockService implements OnModuleInit {
-  private readonly mempool: any;
+export class BlockService {
+  private readonly logger = new Logger(BlockService.name);
   constructor(
     private readonly dbService: DatabaseService,
     private readonly transactionService: TransactionService,
     private readonly p2pClientsService: P2pClientService,
     private readonly blockchainService: BlockchainService,
     private readonly p2pServerGateway: P2pGateway
-  ) {
-    this.mempool = dbService.getMempool();
-  }
+  ) {}
 
-  async onModuleInit() {
-    // setInterval(() => {
-    //   this.genereateBlock();
-    // }, GENERATION_DELAY);
-  }
-
+  @Cron('*/10 * * * * *')
   async genereateBlock() {
-
-    //console.log(await this.transactionService.printMempool())
+    // this.logger.log(await this.transactionService.printMempool())
     const _mempool: any = await this.transactionService.printMempool();
 
     const valid_transactions: any = []; 
@@ -50,31 +42,21 @@ export class BlockService implements OnModuleInit {
       }
     }
 
-    
-
-
     if (valid_transactions.length < MINIMUM_TRANSACTION_PER_BLOCK) {
-      
-      
-      console.log(`Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`)
-      console.log("--------------------------------------------------------")
+      this.logger.error(`Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`)
       return;
     }
-    else {
-      
-      
-      console.log(`Result: Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`)
-    }
+    this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`)
 
-    for (const addr of node_addresses) {
+    for (const addr of node_addresses.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT}`)) {
       const req_addr = "http://" + addr + "/info";
-      //console.log(req_addr)
+      this.logger.verbose(`Requesting ${addr}`)
       await axios.get(req_addr).then((res) => {
-        node_staking_info.push(res.data);
-        //console.log(res.data)
-      });
+        // node_staking_info.push(res.data);
+        console.log(res.data)
+      }).catch(error => console.log(error));
     }
-
+    return; ///temp
     //console.log(node_staking_info)
     //creating block
 
@@ -84,7 +66,7 @@ export class BlockService implements OnModuleInit {
     const selectedNode = top3Nodes[randomNodeIndex];
     //console.log("Selected node info: \n", selectedNode)
 
-    if (selectedNode.addr !== getLocalIp() + ":3000") return; // checking
+    if (selectedNode.addr !== getLocalIp() + process.env.PORT) return; // checking
 
     //console.log("Selected Node's Public Key:", selectedNode.public_key);
 
@@ -134,28 +116,20 @@ export class BlockService implements OnModuleInit {
     await this.blockchainService.addToBlockchain(blockWithTransactions)
     
     
-    console.log("Block Status: Block created and added to the chain.")
+    this.logger.log("Block Status: Block created and added to the chain.")
 
     //----------- delete transactions from mempool
     
     
-    console.log("Mempool cleanup: Cleaning . . .")
-    for(const transaction of valid_transactions) {
-      await this.transactionService.deleteTransactionFromMempool(transaction)
-    }
-    
-    
-    
-    console.log("Mempool cleanup: Success")
+    this.logger.warn("Mempool cleanup: Cleaning . . .")
+    await this.transactionService.deleteMultipleTransactionsFromMempool(valid_transactions)
+    this.logger.log("Mempool cleanup: Success")
 
     //--------propagate
 
     this.p2pServerGateway.blockBroadcast(blockWithTransactions);
+    this.logger.log("Broadcast: Successfully broadcasted to peers")
     
-    
-    console.log("Broadcast: Successfully broadcasted to peers")
-    
-    console.log("--------------------------------------------------------")
   }
 
   // -----------------------------------------
