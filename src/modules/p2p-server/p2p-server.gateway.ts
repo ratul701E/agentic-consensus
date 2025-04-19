@@ -2,14 +2,16 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server } from 'socket.io';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
 import { BlockDTO } from 'src/dtos/block.dto';
+import { Logger } from '@nestjs/common';
 
 
 @WebSocketGateway()
 
 export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor() {
 
-  }
+  private readonly logger = new Logger(P2pGateway.name);
+
+  constructor(){}
 
   @WebSocketServer() server: Server;
 
@@ -19,11 +21,11 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   afterInit(server: any) {
-    console.log("P2P Server initialized.....");
+    this.logger.log("P2P Server initialized.....");
   }
 
   handleConnection(client: any, ...args: any[]) {
-    console.log("NEW NODE! connected: ", this.getSocketsCount())
+    this.logger.log("NEW NODE! connected: ", this.getSocketsCount())
     //client.broadcast.emit('new_node_connect', `A new node (${client.id}) just connected to the server`)
 
     // console.log(`User: ${client.id} \n\r
@@ -35,7 +37,7 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   handleDisconnect(client: any) {
-    console.log("NODE LEAVE! connected: ", this.getSocketsCount())
+    this.logger.warn("NODE LEAVE! connected: ", this.getSocketsCount())
     //client.broadcast.emit('node_disconnect', `A node (${client.id}) just disconnected`)
     // client.broadcast.emit('greet', {
     //   id: client.id,
@@ -55,7 +57,7 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('new_transaction')
   async handlNewTransaction(client: any, transaction: TransactionDTO) : Promise<void | string> {
-    //console.log(transaction);
+    this.logger.log("Receive via peer node: ", transaction);
     //let status = await this.p2pService.validateTransaction(transaction)
 
     // let success = await this.transactionService.addTransactionToMempool(transaction)

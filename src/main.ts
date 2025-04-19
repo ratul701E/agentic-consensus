@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as os from 'os'
-import * as cors from 'cors'
+import { CustomLogger } from './logger/custom.logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  //const PORT = process.argv[process.argv.indexOf("--port") + 1]
+  const app = await NestFactory.create(AppModule, {
+    logger: new CustomLogger(),
+  });
   app.enableCors()
   const PORT = process.env.PORT || 3000
-
   await app.listen(PORT, getLocalIp());
   console.log("Running on: " + getLocalIp() + ":" + PORT)
 }
@@ -29,6 +29,5 @@ export const getLocalIp = (): string => {
       }
     }
   }
-
-  return '';
+  return '172.0.0.1';
 };

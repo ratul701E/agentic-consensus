@@ -15,10 +15,13 @@ import { P2pServerModule } from './modules/p2p-server/p2p-server.module';
 import { BlockchainModule } from './modules/blockchain/blockchain.module';
 import { BlockModule } from './modules/block/block.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
+import { InfoModule } from './modules/info/info.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ScheduleModule.forRoot(),
     DeepseekAgentModule,
     OpenaiAgentModule,
     MongooseModule.forRoot(process.env.MONGO_URI),
@@ -31,6 +34,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
     DatabaseModule,
     BlockchainModule,
     BlockModule,
+    InfoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
