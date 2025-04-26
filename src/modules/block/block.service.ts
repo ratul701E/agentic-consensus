@@ -1,4 +1,4 @@
-import { DatabaseService } from 'src/modules/database/database.service';
+import { DatabaseService } from "src/modules/database/database.service";
 import { Injectable, Logger } from "@nestjs/common";
 import crypto from "crypto";
 import { TransactionService } from "src/modules/transaction/transaction.service";
@@ -7,10 +7,11 @@ import axios from "axios";
 import { BlockchainService } from "src/modules/blockchain/blockchain.service";
 import { getLocalIp } from "src/main";
 import { P2pGateway } from "src/modules/p2p-server/p2p-server.gateway";
-import { Cron } from '@nestjs/schedule';
-import { NodeInfoDocument } from 'src/schemas/node-info.schema';
-import { TransactionDocument } from 'src/schemas/blockchain.schema';
-import { InfoService } from '../info/info.service';
+import { Cron } from "@nestjs/schedule";
+import { NodeInfoDocument } from "src/schemas/node-info.schema";
+import { TransactionDocument } from "src/schemas/blockchain.schema";
+import { InfoService } from "../info/info.service";
+import { ProofKitService } from "src/services/proof-kit/proof-kit.service";
 
 const MINIMUM_TRANSACTION_PER_BLOCK = 1;
 
@@ -24,57 +25,61 @@ export class BlockService {
     private readonly blockchainService: BlockchainService,
     private readonly p2pServerGateway: P2pGateway,
     private readonly infoService: InfoService,
+    private readonly proofKitService: ProofKitService,
   ) {}
 
-  @Cron('*/10 * * * * *')
+  @Cron("*/10 * * * * *")
   async genereateBlock() {
     // this.logger.log(await this.transactionService.printMempool())
     const _mempool: any = await this.transactionService.printMempool();
 
     // this.logger.log(`Mempool: ${JSON.stringify(_mempool)}`)
 
-    const valid_transactions: any = []; 
+    const valid_transactions: any = [];
     const last_block: any = await this.blockchainService.getLastBlock();
     const node_addresses = this.p2pClientsService.getNodeAddress();
-    const node_staking_info: NodeInfoDocument[] = [
-      await this.infoService.getThisNodeInfo(),
-    ];
-
+    const node_staking_info: NodeInfoDocument[] = [await this.infoService.getThisNodeInfo()];
 
     for (const transaction of _mempool) {
-      const status = await this.transactionService.validateTransaction(transaction)
-      if (
-        status == "Valid Transaction"
-      ) {
+      const status = await this.transactionService.validateTransaction(transaction);
+      if (status == "Valid Transaction") {
         valid_transactions.push(transaction);
-      }
-      else {
-        this.logger.warn(`Transaction ${transaction.transactionHash} is invalid. Reason: ${status}`)
+      } else {
+        this.logger.warn(`Transaction ${transaction.transactionHash} is invalid. Reason: ${status}`);
       }
     }
 
     if (valid_transactions.length < MINIMUM_TRANSACTION_PER_BLOCK) {
-      this.logger.error(`Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`)
+      this.logger.error(
+        `Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`,
+      );
       return;
     }
     this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`);
 
     for (const addr of node_addresses.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT || 3000}`)) {
       const req_addr = "http://" + addr + "/info";
-      this.logger.verbose(`Requesting ${addr} for staking info`)
-      await axios.get(req_addr).then((res) => {
-        node_staking_info.push(res.data);
-        console.log(`${addr} staking info: \n`, res.data)
-      }).catch(error => console.log(error));
+      this.logger.verbose(`Requesting ${addr} for staking info`);
+      await axios
+        .get(req_addr)
+        .then((res) => {
+          node_staking_info.push(res.data);
+          console.log(`${addr} staking info: \n`, res.data);
+        })
+        .catch((error) => console.log(error));
     }
-    
 
-    if (node_staking_info.length < 3) {
+    if (node_staking_info.length < 2) {
+      //TODO UPDATE LOGIC
       this.logger.error(`Result: Failed. Need at least 3 nodes to create block. Found ${node_staking_info.length}`);
       this.logger.error(`❌ BLOCK CREATION ABORTED`);
       return;
     }
 
+    const randomSeed = this.proofKitService.verifiableRandomFunction(node_staking_info, "epoch_Seed");
+    const leaderSchedule = this.proofKitService.generateWeightedLeaderSchedule(node_staking_info, randomSeed, 20);
+    this.logger.verbose(`Leader schedule: ${JSON.stringify(leaderSchedule, null, 2)}`);
+    return;
     this.logger.verbose(`✅ All nodes staking info collected. Proceeding to block creation...`);
 
     node_staking_info.sort((a: NodeInfoDocument, b: NodeInfoDocument) => b.stake - a.stake);
@@ -107,21 +112,16 @@ export class BlockService {
     };
 
     valid_transactions.forEach((transaction: TransactionDocument) => {
-      transaction.block = blockWithTransactions.blockInfo.blockNumber
-      transaction.status = 'success'
+      transaction.block = blockWithTransactions.blockInfo.blockNumber;
+      transaction.status = "success";
       blockWithTransactions.transactions.push(transaction);
     });
 
-    const merkleRoot = await this.buildMerkleTree(
-      blockWithTransactions.transactions
-    );
+    const merkleRoot = await this.buildMerkleTree(blockWithTransactions.transactions);
     //console.log('Merkle Root:', merkleRoot);
     blockWithTransactions.blockInfo.merkleRoot = merkleRoot;
 
-    const blockHash = crypto
-      .createHash("sha256")
-      .update(JSON.stringify(blockWithTransactions.blockInfo))
-      .digest("hex");
+    const blockHash = crypto.createHash("sha256").update(JSON.stringify(blockWithTransactions.blockInfo)).digest("hex");
     //console.log('Block Hash:', blockHash);
 
     blockWithTransactions.blockInfo.blockHash = blockHash;
@@ -130,23 +130,20 @@ export class BlockService {
     //console.log(blockWithTransactions)
 
     //--------add to blockchain db
-    await this.blockchainService.addToBlockchain(blockWithTransactions)
-    
-    
-    this.logger.log("Block Status: Block created and added to the chain.")
+    await this.blockchainService.addToBlockchain(blockWithTransactions);
+
+    this.logger.log("Block Status: Block created and added to the chain.");
 
     //----------- delete transactions from mempool
-    
-    
-    this.logger.warn("Mempool cleanup: Cleaning . . .")
-    await this.transactionService.deleteMultipleTransactionsFromMempool(valid_transactions)
-    this.logger.log("Mempool cleanup: Success")
+
+    this.logger.warn("Mempool cleanup: Cleaning . . .");
+    await this.transactionService.deleteMultipleTransactionsFromMempool(valid_transactions);
+    this.logger.log("Mempool cleanup: Success");
 
     //--------propagate
 
     this.p2pServerGateway.blockBroadcast(blockWithTransactions);
-    this.logger.log("Broadcast: Successfully broadcasted to peers")
-    
+    this.logger.log("Broadcast: Successfully broadcasted to peers");
   }
 
   // -----------------------------------------
@@ -157,10 +154,7 @@ export class BlockService {
     }
 
     const tree = transactions.map((transaction) =>
-      crypto
-        .createHash("sha256")
-        .update(transaction.transactionHash)
-        .digest("hex")
+      crypto.createHash("sha256").update(transaction.transactionHash).digest("hex"),
     );
 
     while (tree.length > 1) {

@@ -7,9 +7,10 @@ import { DatabaseModule } from 'src/modules/database/database.module';
 import { P2pClientModule } from '../p2p-client/p2p-client.module';
 import { BlockchainModule } from '../blockchain/blockchain.module';
 import { InfoModule } from '../info/info.module';
+import { ProofKitModule } from 'src/services/proof-kit/proof-kit.module';
 
 @Module({
-  imports: [DatabaseModule, TransactionModule, P2pClientModule, BlockchainModule, P2pServerModule, InfoModule],
+  imports: [DatabaseModule, TransactionModule, P2pClientModule, BlockchainModule, P2pServerModule, InfoModule, ProofKitModule],
   controllers: [BlockController],
   providers: [BlockService]
 })
