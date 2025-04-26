@@ -1,1 +1,9 @@
-**
+.yarn
+.next
+dist
+node_modules
+.git
+*.js
+*.json
+.vscode
+*.log

@@ -7,6 +7,6 @@ export class InfoController {
 
     @Get()
     async getInfo() {
-        return await this.infoService.getNodeInfo();  
+        return await this.infoService.getThisNodeInfo();  
     }
 }

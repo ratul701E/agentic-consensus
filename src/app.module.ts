@@ -17,6 +17,7 @@ import { BlockModule } from './modules/block/block.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { InfoModule } from './modules/info/info.module';
+import { ProofKitModule } from './services/proof-kit/proof-kit.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { InfoModule } from './modules/info/info.module';
     BlockchainModule,
     BlockModule,
     InfoModule,
+    ProofKitModule,
   ],
   controllers: [AppController],
   providers: [AppService],

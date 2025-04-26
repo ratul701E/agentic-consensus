@@ -8,6 +8,9 @@ import { BlockchainService } from "src/modules/blockchain/blockchain.service";
 import { getLocalIp } from "src/main";
 import { P2pGateway } from "src/modules/p2p-server/p2p-server.gateway";
 import { Cron } from '@nestjs/schedule';
+import { NodeInfoDocument } from 'src/schemas/node-info.schema';
+import { TransactionDocument } from 'src/schemas/blockchain.schema';
+import { InfoService } from '../info/info.service';
 
 const MINIMUM_TRANSACTION_PER_BLOCK = 1;
 
@@ -19,7 +22,8 @@ export class BlockService {
     private readonly transactionService: TransactionService,
     private readonly p2pClientsService: P2pClientService,
     private readonly blockchainService: BlockchainService,
-    private readonly p2pServerGateway: P2pGateway
+    private readonly p2pServerGateway: P2pGateway,
+    private readonly infoService: InfoService,
   ) {}
 
   @Cron('*/10 * * * * *')
@@ -32,7 +36,9 @@ export class BlockService {
     const valid_transactions: any = []; 
     const last_block: any = await this.blockchainService.getLastBlock();
     const node_addresses = this.p2pClientsService.getNodeAddress();
-    const node_staking_info = [];
+    const node_staking_info: NodeInfoDocument[] = [
+      await this.infoService.getThisNodeInfo(),
+    ];
 
 
     for (const transaction of _mempool) {
@@ -52,6 +58,7 @@ export class BlockService {
       return;
     }
     this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`);
+
     for (const addr of node_addresses.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT || 3000}`)) {
       const req_addr = "http://" + addr + "/info";
       this.logger.verbose(`Requesting ${addr} for staking info`)
@@ -60,17 +67,23 @@ export class BlockService {
         console.log(`${addr} staking info: \n`, res.data)
       }).catch(error => console.log(error));
     }
-    return; ///temp
-    //console.log(node_staking_info)
-    //creating block
+    
 
-    node_staking_info.sort((a, b) => b.staking_coin - a.staking_coin);
+    if (node_staking_info.length < 3) {
+      this.logger.error(`Result: Failed. Need at least 3 nodes to create block. Found ${node_staking_info.length}`);
+      this.logger.error(`❌ BLOCK CREATION ABORTED`);
+      return;
+    }
+
+    this.logger.verbose(`✅ All nodes staking info collected. Proceeding to block creation...`);
+
+    node_staking_info.sort((a: NodeInfoDocument, b: NodeInfoDocument) => b.stake - a.stake);
     const top3Nodes = node_staking_info.slice(0, 3);
     const randomNodeIndex = Math.floor(Math.random() * top3Nodes.length);
     const selectedNode = top3Nodes[randomNodeIndex];
     //console.log("Selected node info: \n", selectedNode)
 
-    if (selectedNode.addr !== getLocalIp() + process.env.PORT) return; // checking
+    if (selectedNode.network_address !== getLocalIp() + process.env.PORT || 3000) return; // checking
 
     //console.log("Selected Node's Public Key:", selectedNode.public_key);
 
@@ -82,9 +95,9 @@ export class BlockService {
         blockHash: "",
         previousBlockHash: last_block.blockInfo.blockHash,
         validator: {
-          publicKey: selectedNode.public_key,
-          stakingBalance: selectedNode.staking_coin,
-          validatorSignature: selectedNode.public_key,
+          publicKey: selectedNode.address,
+          stakingBalance: selectedNode.stake,
+          validatorSignature: selectedNode.address,
         },
         proofOfStake: {
           stakingReward: 2,
@@ -93,7 +106,7 @@ export class BlockService {
       transactions: [],
     };
 
-    valid_transactions.forEach((transaction) => {
+    valid_transactions.forEach((transaction: TransactionDocument) => {
       transaction.block = blockWithTransactions.blockInfo.blockNumber
       transaction.status = 'success'
       blockWithTransactions.transactions.push(transaction);

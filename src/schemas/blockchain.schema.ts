@@ -10,7 +10,7 @@ class Validator {
   publicKey: string;
 
   @Prop({ required: true })
-  stakingBalance: string;
+  stakingBalance: number;
 
   @Prop({ required: true })
   validatorSignature: string;
@@ -93,3 +93,8 @@ export class Blockchain {
 }
 
 export const BlockchainSchema = SchemaFactory.createForClass(Blockchain);
+export type ValidatorDocument = HydratedDocument<Validator>;
+export type ProofOfStakeDocument = HydratedDocument<ProofOfStake>;
+export type BlockInfoDocument = HydratedDocument<BlockInfo>;
+export type TransactionDocument = HydratedDocument<Transaction>;
+

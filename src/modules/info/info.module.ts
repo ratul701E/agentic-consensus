@@ -8,5 +8,6 @@ import { InfoController } from './info.controller';
   providers: [InfoService],
   imports: [MongooseModule.forFeature([{ name: NodeInfo.name, schema: NodeInfoSchema }])],
   controllers: [InfoController],
+  exports: [InfoService]
 })
 export class InfoModule {}
