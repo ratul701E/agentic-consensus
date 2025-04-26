@@ -27,6 +27,8 @@ export class BlockService {
     // this.logger.log(await this.transactionService.printMempool())
     const _mempool: any = await this.transactionService.printMempool();
 
+    // this.logger.log(`Mempool: ${JSON.stringify(_mempool)}`)
+
     const valid_transactions: any = []; 
     const last_block: any = await this.blockchainService.getLastBlock();
     const node_addresses = this.p2pClientsService.getNodeAddress();
@@ -40,6 +42,9 @@ export class BlockService {
       ) {
         valid_transactions.push(transaction);
       }
+      else {
+        this.logger.warn(`Transaction ${transaction.transactionHash} is invalid. Reason: ${status}`)
+      }
     }
 
     if (valid_transactions.length < MINIMUM_TRANSACTION_PER_BLOCK) {
@@ -52,7 +57,7 @@ export class BlockService {
       this.logger.verbose(`Requesting ${addr} for staking info`)
       await axios.get(req_addr).then((res) => {
         node_staking_info.push(res.data);
-        console.log(res.data)
+        console.log(`${addr} staking info: \n`, res.data)
       }).catch(error => console.log(error));
     }
     return; ///temp

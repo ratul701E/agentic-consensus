@@ -60,7 +60,8 @@ export class TransactionService {
     }
 
     async validateTransaction(transaction: TransactionDTO): Promise<string> {
-        if (!await this.validateBalance(transaction)) return "Insufficient Account Balance";
+        // TODO: Implement validation logic
+        // if (!await this.validateBalance(transaction)) return "Insufficient Account Balance";
         // if (!await this.validateSignature(transaction)) return "Unable to Validate Signature";
         return "Valid Transaction";
     }
