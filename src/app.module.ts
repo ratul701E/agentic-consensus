@@ -18,6 +18,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { InfoModule } from './modules/info/info.module';
 import { ProofKitModule } from './services/proof-kit/proof-kit.module';
+import { EpochModule } from './services/epoch/epoch.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ProofKitModule } from './services/proof-kit/proof-kit.module';
     BlockModule,
     InfoModule,
     ProofKitModule,
+    EpochModule,
   ],
   controllers: [AppController],
   providers: [AppService],
