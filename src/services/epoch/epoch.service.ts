@@ -44,10 +44,10 @@ export class EpochService implements OnModuleInit {
       return;
     }
 
-    if (nodes_information.length < 2) {
-      this.logger.error("❌ Not enough nodes connected for create an epoch!");
-      return;
-    }
+    // if (nodes_information.length < 2) {
+    //   this.logger.error("❌ Not enough nodes connected for create an epoch!");
+    //   return;
+    // }
 
     const random_seed = this.proofKitService.verifiableRandomFunction(
       nodes_information,
@@ -142,6 +142,7 @@ export class EpochService implements OnModuleInit {
   }
 
   async getNextSlot() {
+    if (this.CURRENT_SLOT > this.MAX_SLOTS_PER_EPOCH) return null;
     const lastEpoch = await this.getLastEpoch();
     if (!lastEpoch) {
       return null;

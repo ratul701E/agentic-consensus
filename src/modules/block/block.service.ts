@@ -38,7 +38,7 @@ export class BlockService implements OnModuleInit {
     }, 1000);
   }
 
-  @Cron("10 * * * * *", { timeZone: "UTC" })
+  @Cron("*/10 * * * * *", { timeZone: "UTC" })
   async genereateBlock() {
     if (!this.allowCron) return;
 
