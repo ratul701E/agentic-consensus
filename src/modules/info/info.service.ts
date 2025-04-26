@@ -21,6 +21,8 @@ export class InfoService implements OnModuleInit {
       const nodeInfo = new this.nodeInfoModel({
         address: this.myAddress,
         network_address: `${getLocalIp()}:${process.env.PORT || 3000}`,
+        stake: Math.floor(Math.random() * (150 - 100 + 1)) + 100,
+        reputation: Math.floor(Math.random() * (15 - 10 + 1)) + 10,
       });
       await nodeInfo.save();
       this.logger.log("Created new node info record");
