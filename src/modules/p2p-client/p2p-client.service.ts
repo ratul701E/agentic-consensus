@@ -4,7 +4,7 @@ import { getLocalIp } from 'src/main';
 @Injectable()
 export class P2pClientService {
 
-    private readonly PORT = 3000//process.argv[process.argv.indexOf("--port") + 1]
+    private readonly PORT = process.env.PORT || 3000//process.argv[process.argv.indexOf("--port") + 1]
     private node_addresses: string[] = [
         getLocalIp() + ":" + this.PORT, //adding own address to ignore connection with own
     ]
