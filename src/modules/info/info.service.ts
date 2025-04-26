@@ -3,6 +3,7 @@ import { NodeInfo } from 'src/schemas/node-info.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { createHash } from 'crypto';
+import { getLocalIp } from 'src/main';
 
 
 
@@ -19,6 +20,7 @@ export class InfoService implements OnModuleInit{
         if (!existingNode) {
             const nodeInfo = new this.nodeInfoModel({
                 address: this.myAddress,
+                network_address: `${getLocalIp()}:${process.env.PORT || 3000}`,
             });
             await nodeInfo.save();
             this.logger.log('Created new node info record');

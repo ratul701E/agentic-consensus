@@ -46,13 +46,12 @@ export class BlockService {
       this.logger.error(`Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`)
       return;
     }
-    this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`)
-
-    for (const addr of node_addresses.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT}`)) {
+    this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`);
+    for (const addr of node_addresses.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT || 3000}`)) {
       const req_addr = "http://" + addr + "/info";
-      this.logger.verbose(`Requesting ${addr}`)
+      this.logger.verbose(`Requesting ${addr} for staking info`)
       await axios.get(req_addr).then((res) => {
-        // node_staking_info.push(res.data);
+        node_staking_info.push(res.data);
         console.log(res.data)
       }).catch(error => console.log(error));
     }
