@@ -6,7 +6,7 @@ import { TransactionDTO } from 'src/dtos/transaction.dto';
 export class TransactionController {
 
     constructor(private readonly transactionService: TransactionService) {
-        console.log("Requested")
+        // console.log("Requested")
     }
     @Post()
     async addTransactionToMempool(@Body() transaction: TransactionDTO): Promise <any> {

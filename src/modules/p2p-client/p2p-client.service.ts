@@ -4,9 +4,9 @@ import { getLocalIp } from "src/main";
 @Injectable()
 export class P2pClientService {
   private readonly PORT = process.env.PORT || 3000; //process.argv[process.argv.indexOf("--port") + 1]
-  private node_addresses: string[] = [
-    getLocalIp() + ":" + this.PORT, //adding own address to ignore connection with own
-  ];
+  private node_addresses: Record<string, string> = {
+    own: getLocalIp() + ":" + this.PORT,
+  };
   private sockets: any = [];
   private seed_sockets: any = [];
   private readonly seed_servers: string[] = [
@@ -19,8 +19,20 @@ export class P2pClientService {
     //this.seed_servers.push(process.env.SEED_SERVER_ADDRESS_1 || "http://seed:4000")
   }
 
-  addNodeAddress(addr: string): void {
-    this.node_addresses.push(addr);
+  addNodeAddress(id: string, addr: string): void {
+    const existingAddresses = Object.values(this.node_addresses);
+    if (!existingAddresses.includes(addr)) {
+      this.node_addresses[id] = addr;
+    }
+  }
+
+  addNodeAddresses(addresses: Record<string, string>): void {
+    for (const [id, addr] of Object.entries(addresses)) {
+      const existingAddresses = Object.values(this.node_addresses);
+      if (!existingAddresses.includes(addr)) {
+        this.node_addresses[id] = addr;
+      }
+    }
   }
 
   // replaceNodeAddressList(addrs: string[]) : void {
@@ -28,11 +40,15 @@ export class P2pClientService {
   // }
 
   appendNodeAddrList(addrs: string[]): void {
-    this.node_addresses = [...new Set(...addrs, ...this.node_addresses)];
+    // this.node_addresses = [...new Set(...addrs, ...this.node_addresses)];
   }
 
   getNodeAddress(): string[] {
-    return this.node_addresses;
+    return Object.values(this.node_addresses);
+  }
+
+  removeFromActiveNodeList(id: string): void {
+    delete this.node_addresses[id];
   }
 
   addSocket(socket: any): void {
