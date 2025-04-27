@@ -73,7 +73,7 @@ export class ProofKitService {
       score: node.stake * this.STAKE_WEIGHT + node.reputation * this.REPUTATION_WEIGHT,
     }));
 
-    const totalScore = nodeScores.reduce((sum, node) => sum + node.score, 0);
+    const totalScore = Math.floor(nodeScores.reduce((sum, node) => sum + node.score, 0));
 
     if (totalScore === 0) {
       throw new Error("Total score is zero. Cannot generate leader schedule.");
