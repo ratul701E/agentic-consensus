@@ -47,8 +47,12 @@ export class P2pClientGateway implements OnGatewayInit {
 
       //node list response from seed server
       seedSocket.on("node_info_res", (node_addr_list) => {
-        console.log(node_addr_list);
+        // console.log(node_addr_list);
         this.p2pClientService.addNodeAddresses(node_addr_list);
+      });
+
+      seedSocket.on("node_disconnected", (id) => {
+        this.p2pClientService.removeFromActiveNodeList(id);
       });
     }
   }

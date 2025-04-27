@@ -1,8 +1,12 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { getLocalIp } from "src/main";
 
 @Injectable()
 export class P2pClientService {
+  private readonly logger = new Logger(P2pClientService.name);
+  // private readonly PORT = process.env.PORT || 3000; //process.argv[process.argv.indexOf("--port") + 1]
+  // private node_addresses: string[] = [getLocalIp() + ":" + this.PORT];
+  // private sockets: any = [];
   private readonly PORT = process.env.PORT || 3000; //process.argv[process.argv.indexOf("--port") + 1]
   private node_addresses: Record<string, string> = {
     own: getLocalIp() + ":" + this.PORT,
@@ -27,6 +31,7 @@ export class P2pClientService {
   }
 
   addNodeAddresses(addresses: Record<string, string>): void {
+    this.logger.debug(`adding node addresses: ${JSON.stringify(addresses, null, 2)}`);
     for (const [id, addr] of Object.entries(addresses)) {
       const existingAddresses = Object.values(this.node_addresses);
       if (!existingAddresses.includes(addr)) {
@@ -48,7 +53,9 @@ export class P2pClientService {
   }
 
   removeFromActiveNodeList(id: string): void {
+    this.logger.debug(`removing ${id} from active node list`);
     delete this.node_addresses[id];
+    this.logger.debug(`updated active node list: ${JSON.stringify(this.node_addresses, null, 2)}`);
   }
 
   addSocket(socket: any): void {

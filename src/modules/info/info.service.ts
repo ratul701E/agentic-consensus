@@ -8,7 +8,7 @@ import { getLocalIp } from "src/main";
 @Injectable()
 export class InfoService implements OnModuleInit {
   private readonly myAddress = createHash("sha256")
-    .update(String(process.env.PORT || 3000))
+    .update(String(`${getLocalIp()}:${process.env.PORT || 3000}`))
     .digest("hex");
   private readonly logger = new Logger(InfoService.name);
 
