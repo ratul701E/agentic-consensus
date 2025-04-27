@@ -1,76 +1,69 @@
-import { Injectable } from '@nestjs/common';
-import { getLocalIp } from 'src/main';
+import { Injectable } from "@nestjs/common";
+import { getLocalIp } from "src/main";
 
 @Injectable()
 export class P2pClientService {
+  private readonly PORT = process.env.PORT || 3000; //process.argv[process.argv.indexOf("--port") + 1]
+  private node_addresses: string[] = [
+    getLocalIp() + ":" + this.PORT, //adding own address to ignore connection with own
+  ];
+  private sockets: any = [];
+  private seed_sockets: any = [];
+  private readonly seed_servers: string[] = [
+    process.env.SEED_SERVER_ADDRESS || "http://192.168.31.202:4000",
+    //"http://localhost:4001",
+    //"http://localhost:4002",
+  ];
 
-    private readonly PORT = process.env.PORT || 3000//process.argv[process.argv.indexOf("--port") + 1]
-    private node_addresses: string[] = [
-        getLocalIp() + ":" + this.PORT, //adding own address to ignore connection with own
-    ]
-    private sockets: any = []
-    private seed_sockets: any = []
-    private readonly seed_servers: string[] = [
-        "http://192.168.31.202:4000"
-      //"http://localhost:4001",
-      //"http://localhost:4002",
-    ]
+  constructor() {
+    //this.seed_servers.push(process.env.SEED_SERVER_ADDRESS_1 || "http://seed:4000")
+  }
 
+  addNodeAddress(addr: string): void {
+    this.node_addresses.push(addr);
+  }
 
-    constructor() {
-        //this.seed_servers.push(process.env.SEED_SERVER_ADDRESS_1 || "http://seed:4000")
-    }
+  // replaceNodeAddressList(addrs: string[]) : void {
+  //     this.node_addresses = addrs
+  // }
 
+  appendNodeAddrList(addrs: string[]): void {
+    this.node_addresses = [...new Set(...addrs, ...this.node_addresses)];
+  }
 
-    addNodeAddress(addr: string) : void {
-        this.node_addresses.push(addr)
-    }
+  getNodeAddress(): string[] {
+    return this.node_addresses;
+  }
 
-    // replaceNodeAddressList(addrs: string[]) : void {
-    //     this.node_addresses = addrs
-    // }
+  addSocket(socket: any): void {
+    this.sockets.push(socket);
+  }
 
-    appendNodeAddrList(addrs: string[]) : void {
-        this.node_addresses = [... new Set(...addrs, ...this.node_addresses)]
-    }
+  getSocketList(): any[] {
+    return this.sockets;
+  }
 
-    getNodeAddress() : string[] {
-        return this.node_addresses
-    }
+  replaceSocketList(sockets: any[]): void {
+    this.sockets = sockets;
+  }
 
-    addSocket(socket: any): void {
-        this.sockets.push(socket)
-    }
+  getSeedNodeAddrList(): string[] {
+    return this.seed_servers;
+  }
 
-    getSocketList(): any[] {
-        return this.sockets
-    }
+  // addSeedNodeAddr(addr: string): void {
+  //     this.seed_servers.push(addr)
+  // }
 
-    replaceSocketList(sockets: any[]): void {
-        this.sockets = sockets
-    }
+  // replaceSeedNodeAddr(addrs: string[]): void {
+  //     this.seed_servers = addrs
+  // }
 
-    getSeedNodeAddrList(): string[] {
-        return this.seed_servers
-    }
+  addSeedSocket(seedSocket: any): void {
+    this.seed_sockets.push(seedSocket);
+  }
 
-    // addSeedNodeAddr(addr: string): void {
-    //     this.seed_servers.push(addr)
-    // }
-
-    // replaceSeedNodeAddr(addrs: string[]): void {
-    //     this.seed_servers = addrs
-    // }
-
-    addSeedSocket(seedSocket: any) : void {
-        this.seed_sockets.push(seedSocket)
-    }
-
-    getSeedSocketList() : any[] {
-        return this.seed_sockets
-    }
-
-
-
-
+  getSeedSocketList(): any[] {
+    return this.seed_sockets;
+  }
 }

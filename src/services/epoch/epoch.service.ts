@@ -46,10 +46,10 @@ export class EpochService implements OnModuleInit {
       return;
     }
 
-    // if (nodes_information.length < 2) {
-    //   this.logger.error("❌ Not enough nodes connected for create an epoch!");
-    //   return;
-    // }
+    if (nodes_information.length < 2) {
+      this.logger.error("❌ Not enough nodes connected for create an epoch!");
+      return;
+    }
 
     const random_seed = this.proofKitService.verifiableRandomFunction(
       nodes_information,
