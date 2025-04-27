@@ -52,7 +52,7 @@ export class EpochService implements OnModuleInit {
 
     const random_seed = this.proofKitService.verifiableRandomFunction(
       nodes_information,
-      lastEpoch ? lastEpoch._id.toString() : "first_epoch_random_seed_value_DECENTRALIZED_CHAIN_LINK",
+      "epoch_random_seed_value_DECENTRALIZED_CHAIN_LINK",
     );
 
     this.logger.log(`Random seed: ${random_seed}`);
