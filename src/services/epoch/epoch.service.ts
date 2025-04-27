@@ -55,6 +55,8 @@ export class EpochService implements OnModuleInit {
       lastEpoch ? lastEpoch._id.toString() : "first_epoch_random_seed_value_DECENTRALIZED_CHAIN_LINK",
     );
 
+    this.logger.log(`Random seed: ${random_seed}`);
+
     const leader_schedule = this.proofKitService.generateWeightedLeaderSchedule(
       nodes_information,
       random_seed,
