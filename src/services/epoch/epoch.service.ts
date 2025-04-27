@@ -12,6 +12,7 @@ import { getLocalIp } from "src/main";
 import { P2pClientService } from "src/modules/p2p-client/p2p-client.service";
 import { InfoService } from "src/modules/info/info.service";
 import axios from "axios";
+import * as crypto from "crypto";
 
 @Injectable()
 export class EpochService implements OnModuleInit {
@@ -52,7 +53,7 @@ export class EpochService implements OnModuleInit {
 
     const random_seed = this.proofKitService.verifiableRandomFunction(
       nodes_information,
-      "epoch_random_seed_value_DECENTRALIZED_CHAIN_LINK",
+      `epoch_random_seed_value_DECENTRALIZED_CHAIN_LINK_${new Date().getUTCMinutes()}`,
     );
 
     this.logger.log(`Random seed: ${random_seed}`);
@@ -64,6 +65,7 @@ export class EpochService implements OnModuleInit {
     );
 
     const newEpoch = new this.epochModel({
+      epochIndentifier: crypto.createHash("sha256").update(random_seed.toString()).digest("hex"),
       startSlot: 0,
       endSlot: this.MAX_SLOTS_PER_EPOCH - 1,
       randomSeed: random_seed,

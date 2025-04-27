@@ -7,6 +7,9 @@ export type EpochDocument = Epoch & Document;
 @Schema({ timestamps: true })
 export class Epoch {
   @Prop({ required: true })
+  epochIndentifier: string;
+
+  @Prop({ required: true })
   startSlot: number;
 
   @Prop({ required: true })
