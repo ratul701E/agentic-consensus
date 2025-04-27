@@ -74,7 +74,7 @@ export class EpochService implements OnModuleInit {
     this.currentEpoch = newEpoch;
 
     this.logger.log("New epoch created!");
-    this.logger.log(`Creating slots for epoch ${newEpoch._id}...`);
+    this.logger.log(`Creating slots for epoch ${newEpoch.epochIndentifier}...`);
 
     for (const [slotNumber, leader] of Object.entries(leader_schedule)) {
       const newSlot = new this.slotModel({
@@ -85,9 +85,9 @@ export class EpochService implements OnModuleInit {
       await newSlot.save();
     }
 
-    this.logger.log(`Slots created for epoch ${newEpoch._id}!`);
+    this.logger.log(`Slots created for epoch ${newEpoch.epochIndentifier}!`);
     this.CURRENT_SLOT = 1;
-    this.logger.log(`Current Epoc: ${this.currentEpoch._id}`);
+    this.logger.log(`Current Epoc: ${this.currentEpoch.epochIndentifier}`);
   }
 
   async updateEpochStatus(epoch_id: string, status: EpochStatus): Promise<boolean> {
@@ -159,7 +159,7 @@ export class EpochService implements OnModuleInit {
       return null;
     }
     this.CURRENT_SLOT++;
-    this.logger.verbose(`Current slot: ${slot.slotNumber} of epoch ${this.currentEpoch._id}`);
+    this.logger.verbose(`Current slot: ${slot.slotNumber} of epoch ${this.currentEpoch.epochIndentifier}`);
     return slot;
   }
 
