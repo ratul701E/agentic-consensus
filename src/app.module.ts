@@ -19,6 +19,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { InfoModule } from './modules/info/info.module';
 import { ProofKitModule } from './services/proof-kit/proof-kit.module';
 import { EpochModule } from './services/epoch/epoch.module';
+import { VdfModule } from './modules/vdf/vdf.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EpochModule } from './services/epoch/epoch.module';
     InfoModule,
     ProofKitModule,
     EpochModule,
+    VdfModule,
   ],
   controllers: [AppController],
   providers: [AppService],

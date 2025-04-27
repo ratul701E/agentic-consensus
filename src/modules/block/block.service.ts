@@ -34,7 +34,7 @@ export class BlockService implements OnModuleInit {
   onModuleInit() {
     setTimeout(() => {
       this.allowCron = true;
-      console.log("Cron job will now run every 10 seconds.");
+      // console.log("Cron job will now run every 10 seconds.");
     }, 1000);
   }
 
@@ -43,8 +43,14 @@ export class BlockService implements OnModuleInit {
     if (!this.allowCron) return;
 
     const my_info = await this.infoService.getThisNodeInfo();
-    const next_epoch = await this.epochService.getNextSlot();
-    if (!next_epoch || next_epoch.leaderAddress !== my_info.address) return;
+    const next_slot_details = await this.epochService.getNextSlot();
+
+    if (next_slot_details) this.logger.log(`Slot Leader Address: ${next_slot_details.leaderAddress}`);
+
+    if (!next_slot_details || next_slot_details.leaderAddress !== my_info.address) {
+      this.logger.warn("Not leader. Skipping block creation.");
+      return;
+    }
 
     // this.logger.log(await this.transactionService.printMempool())
     const _mempool: any = await this.transactionService.printMempool();
