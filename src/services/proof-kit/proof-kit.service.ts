@@ -6,8 +6,8 @@ import * as crypto from "crypto";
 @Injectable()
 export class ProofKitService {
   private readonly logger = new Logger(ProofKitService.name);
-  private readonly STAKE_WEIGHT = 1;
-  private readonly REPUTATION_WEIGHT = 1;
+  private readonly STAKE_WEIGHT = 0.7;
+  private readonly REPUTATION_WEIGHT = 0.3;
 
   constructor() {
     // const nodes: any[] = [

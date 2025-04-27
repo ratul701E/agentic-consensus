@@ -18,6 +18,7 @@ export class EpochService implements OnModuleInit {
   private readonly logger = new Logger(EpochService.name);
   private readonly MAX_SLOTS_PER_EPOCH = 6;
   private CURRENT_SLOT = 1;
+  private currentEpoch: EpochDocument;
 
   constructor(
     @InjectModel(Epoch.name) private readonly epochModel: Model<Epoch>,
@@ -65,6 +66,7 @@ export class EpochService implements OnModuleInit {
       randomSeed: random_seed,
     });
     await newEpoch.save();
+    this.currentEpoch = newEpoch;
 
     this.logger.log("New epoch created!");
     this.logger.log(`Creating slots for epoch ${newEpoch._id}...`);
@@ -80,6 +82,7 @@ export class EpochService implements OnModuleInit {
 
     this.logger.log(`Slots created for epoch ${newEpoch._id}!`);
     this.CURRENT_SLOT = 1;
+    this.logger.log(`Current Epoc: ${this.currentEpoch._id}`);
   }
 
   async updateEpochStatus(epoch_id: string, status: EpochStatus): Promise<boolean> {
@@ -123,7 +126,7 @@ export class EpochService implements OnModuleInit {
     return epoch;
   }
 
-  async getSlot(slot_id: string): Promise<SlotDocument> {
+  async getSlotById(slot_id: string): Promise<SlotDocument> {
     const slot = await this.slotModel.findById(slot_id);
     if (!slot) {
       return null;
@@ -143,15 +146,15 @@ export class EpochService implements OnModuleInit {
 
   async getNextSlot() {
     if (this.CURRENT_SLOT > this.MAX_SLOTS_PER_EPOCH) return null;
-    const lastEpoch = await this.getLastEpoch();
-    if (!lastEpoch) {
+    if (!this.currentEpoch) {
       return null;
     }
-    const slot = await this.slotModel.findOne({ slotNumber: this.CURRENT_SLOT, epoch: lastEpoch._id }).exec();
+    const slot = await this.slotModel.findOne({ slotNumber: this.CURRENT_SLOT, epoch: this.currentEpoch._id }).exec();
     if (!slot) {
       return null;
     }
     this.CURRENT_SLOT++;
+    this.logger.verbose(`Current slot: ${slot.slotNumber} of epoch ${this.currentEpoch._id}`);
     return slot;
   }
 
