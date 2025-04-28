@@ -4,11 +4,12 @@ import { P2pClientService } from "../p2p-client/p2p-client.service";
 import { getLocalIp } from "src/main";
 import axios from "axios";
 import { Interval } from "@nestjs/schedule";
+import { OnEvent } from "@nestjs/event-emitter";
 
 export const INITIAL_VDF_SEED = "0000000000000000000000000000000000000000000000000000000000000000";
 
 @Injectable()
-export class VdfService implements OnModuleInit {
+export class VdfService {
   private readonly logger = new Logger(VdfService.name);
   private readonly difficulty: number = Number(process.env.VDF_DIFFICULTY_LEVEL) || 100;
   private current_clock_tick: string;
@@ -16,7 +17,9 @@ export class VdfService implements OnModuleInit {
 
   constructor(private readonly p2pClientService: P2pClientService) {}
 
-  async onModuleInit() {
+  @OnEvent("seed_connected")
+  async prepareVdfMechanism(payload: any) {
+    this.logger.log(`✅ Seed connected: ${payload}`);
     const connected_peers = this.p2pClientService.getNodeAddress();
     const peers = connected_peers.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT || 3000}`);
 

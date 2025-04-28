@@ -20,6 +20,8 @@ import { InfoModule } from './modules/info/info.module';
 import { ProofKitModule } from './services/proof-kit/proof-kit.module';
 import { EpochModule } from './services/epoch/epoch.module';
 import { VdfModule } from './modules/vdf/vdf.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { InternalEventEmitterModule } from './services/internal-event-emitter/internal-event-emitter.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { VdfModule } from './modules/vdf/vdf.module';
     ProofKitModule,
     EpochModule,
     VdfModule,
+    EventEmitterModule.forRoot(),
+    InternalEventEmitterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

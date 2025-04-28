@@ -5,10 +5,11 @@ import { Server } from "socket.io";
 import { getLocalIp } from "src/main";
 import { TransactionService } from "src/modules/transaction/transaction.service";
 import { TransactionDTO } from "src/dtos/transaction.dto";
-import { Logger } from "@nestjs/common";
+import { Logger, OnApplicationBootstrap } from "@nestjs/common";
+import { InternalEventEmitterService } from "src/services/internal-event-emitter/internal-event-emitter.service";
 
 @WebSocketGateway()
-export class P2pClientGateway implements OnGatewayInit {
+export class P2pClientGateway implements OnApplicationBootstrap {
   private readonly logger = new Logger(P2pClientGateway.name);
   @WebSocketServer() server: Server;
   private readonly PORT = process.env.PORT || 3000;
@@ -16,9 +17,10 @@ export class P2pClientGateway implements OnGatewayInit {
   constructor(
     private readonly p2pClientService: P2pClientService,
     private readonly transacationService: TransactionService,
+    private readonly internalEventEmitterService: InternalEventEmitterService,
   ) {}
 
-  async afterInit() {
+  async onApplicationBootstrap() {
     await this.connectToSeedServers();
     //await this.getNodeAddressFromSeedServer()
   }
@@ -35,6 +37,7 @@ export class P2pClientGateway implements OnGatewayInit {
         this.p2pClientService.addSeedSocket(seedSocket);
         await this.getNodeAddressFromSeedServer(seedSocket);
         this.logger.log(`Connected to seed server [${JSON.stringify(seedAddr)}]`);
+        this.internalEventEmitterService.emit("seed_connected", { seedAddr });
       });
 
       seedSocket.on("disconnect", () => {
