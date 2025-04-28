@@ -8,5 +8,6 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
   controllers: [VdfController],
   providers: [VdfService],
   imports: [P2pClientModule, EventEmitterModule],
+  exports: [VdfService],
 })
 export class VdfModule {}

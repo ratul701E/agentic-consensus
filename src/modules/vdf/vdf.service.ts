@@ -11,7 +11,7 @@ export const INITIAL_VDF_SEED = "00000000000000000000000000000000000000000000000
 @Injectable()
 export class VdfService {
   private readonly logger = new Logger(VdfService.name);
-  private readonly difficulty: number = Number(process.env.VDF_DIFFICULTY_LEVEL) || 100;
+  private readonly hashes_per_tick: number = Number(process.env.HASHES_PER_TICK) || 100;
   private current_clock_tick: string;
   private allow_start_vdf: boolean = false;
 
@@ -61,7 +61,7 @@ export class VdfService {
 
     let currentHash = this.current_clock_tick;
 
-    for (let i = 0; i < this.difficulty; i++) {
+    for (let i = 0; i < this.hashes_per_tick; i++) {
       currentHash = crypto.createHash("sha256").update(currentHash).digest("hex");
     }
 

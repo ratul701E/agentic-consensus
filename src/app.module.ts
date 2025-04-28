@@ -22,6 +22,7 @@ import { EpochModule } from './services/epoch/epoch.module';
 import { VdfModule } from './modules/vdf/vdf.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { InternalEventEmitterModule } from './services/internal-event-emitter/internal-event-emitter.module';
+import { AgentModule } from './modules/agent/agent.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { InternalEventEmitterModule } from './services/internal-event-emitter/in
     VdfModule,
     EventEmitterModule.forRoot(),
     InternalEventEmitterModule,
+    AgentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
