@@ -19,7 +19,6 @@ export class VdfService {
 
   @OnEvent("seed_connected")
   async prepareVdfMechanism(payload: any) {
-    this.logger.log(`✅ Seed connected: ${payload}`);
     const connected_peers = this.p2pClientService.getNodeAddress();
     const peers = connected_peers.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT || 3000}`);
 
@@ -54,7 +53,7 @@ export class VdfService {
     }
   }
 
-  @Interval(200)
+  @Interval(1000) //TODO: CHANGE TO PROPER VDF INTERVAL
   runVDF(): { initialSeed: string; finalHash: string; iterations: number } {
     if (!this.allow_start_vdf) {
       return;
@@ -67,7 +66,7 @@ export class VdfService {
     }
 
     this.current_clock_tick = currentHash;
-
+    this.logger.debug(`✅ VDF completed. CURRENT TICK: ${currentHash}`);
     // return {
     //   initialSeed: this.current_clock_tick,
     //   finalHash: currentHash,
