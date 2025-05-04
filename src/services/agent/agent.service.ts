@@ -31,7 +31,7 @@ export class AgentService {
     this.logger.log("Analyzing system performance...");
     const sysInfo = this.sysInfoService.getSysInfo();
     const res = await this.getSystemReportByAgent(sysInfo);
-    const capacityScore = this.extractCapacityScore(res);
+    const capacityScore = this.extractCapacityScoreV2(res);
     if (capacityScore) {
       const myAddress = this.infoService.getMyAddress();
       const nodeInfo = await this.nodeInfoModel.findOne({ address: myAddress }).exec();
@@ -43,30 +43,33 @@ export class AgentService {
     return {};
   }
 
-  async getSystemReportByAgent(sysInfo: SysInfo): Promise<LlamaResponse> {
-    const res = await axios.post("http://localhost:11434/api/chat", {
-      model: "llama3.2",
-      messages: [
-        { role: "system", content: systemMessage },
-        { role: "assistant", content: assistantMessage },
-        { role: "user", content: createUserMessage(sysInfo) },
-      ],
-      stream: false,
-      format: {
-        type: "object",
-        properties: {
-          capacityScore: {
-            type: "number",
-            minimum: 0,
-            maximum: 1,
-          },
-        },
-        required: ["capacityScore"],
-      },
-    });
+  async getSystemReportByAgent(sysInfo: SysInfo): Promise<any> {
+    return {
+      "capacityScore": 0.5,
+    }
+    // const res = await axios.post("http://localhost:11434/api/chat", {
+    //   model: "llama3.2",
+    //   messages: [
+    //     { role: "system", content: systemMessage },
+    //     { role: "assistant", content: assistantMessage },
+    //     { role: "user", content: createUserMessage(sysInfo) },
+    //   ],
+    //   stream: false,
+    //   format: {
+    //     type: "object",
+    //     properties: {
+    //       capacityScore: {
+    //         type: "number",
+    //         minimum: 0,
+    //         maximum: 1,
+    //       },
+    //     },
+    //     required: ["capacityScore"],
+    //   },
+    // });
 
-    const response = res.data as LlamaResponse;
-    return response;
+    // const response = res.data as LlamaResponse;
+    // return response;
   }
 
   private extractCapacityScore(response: LlamaResponse): number | null {
@@ -80,5 +83,9 @@ export class AgentService {
       console.error("Failed to parse LLM content:", error);
       return null;
     }
+  }
+
+  private extractCapacityScoreV2(response: {capacityScore: number}){
+    return response.capacityScore;
   }
 }
