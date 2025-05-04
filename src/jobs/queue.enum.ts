@@ -1,0 +1,3 @@
+export enum Queues {
+    SYS_PERFORMENCE_ANALYZER = "SYS_PERFORMENCE_ANALYZER"
+}

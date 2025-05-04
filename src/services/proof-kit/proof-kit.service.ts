@@ -6,8 +6,9 @@ import * as crypto from "crypto";
 @Injectable()
 export class ProofKitService {
   private readonly logger = new Logger(ProofKitService.name);
-  private readonly STAKE_WEIGHT = 0.7;
-  private readonly REPUTATION_WEIGHT = 0.3;
+  private readonly STAKE_WEIGHT = 0.4;
+  private readonly REPUTATION_WEIGHT = 0.2;
+  private readonly CAPACITY_WEIGHT = 0.4;
 
   constructor() {
     // const nodes: any[] = [
@@ -70,7 +71,10 @@ export class ProofKitService {
 
     const nodeScores = sortedNodes.map((node) => ({
       address: node.address,
-      score: node.stake * this.STAKE_WEIGHT + node.reputation * this.REPUTATION_WEIGHT,
+      score:
+        node.stake * this.STAKE_WEIGHT +
+        node.reputation * this.REPUTATION_WEIGHT +
+        node.capacityScore * this.CAPACITY_WEIGHT,
     }));
 
     const totalScore = Math.floor(nodeScores.reduce((sum, node) => sum + node.score, 0));

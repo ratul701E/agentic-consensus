@@ -22,7 +22,10 @@ import { EpochModule } from './services/epoch/epoch.module';
 import { VdfModule } from './modules/vdf/vdf.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { InternalEventEmitterModule } from './services/internal-event-emitter/internal-event-emitter.module';
-import { AgentModule } from './modules/agent/agent.module';
+import { SysInfoModule } from './modules/sys-info/sys-info.module';
+import { AgentModule } from './services/agent/agent.module';
+import { BullModule } from '@nestjs/bullmq';
+import { RedisServiceModule } from './services/redis-service/redis-service.module';
 
 @Module({
   imports: [
@@ -47,6 +50,14 @@ import { AgentModule } from './modules/agent/agent.module';
     EventEmitterModule.forRoot(),
     InternalEventEmitterModule,
     AgentModule,
+    SysInfoModule,
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
+      }
+    }),
+    RedisServiceModule
   ],
   controllers: [AppController],
   providers: [AppService],

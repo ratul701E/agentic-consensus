@@ -32,4 +32,8 @@ export class InfoService implements OnModuleInit {
   async getThisNodeInfo(): Promise<NodeInfoDocument> {
     return await this.nodeInfoModel.findOne().where("address", this.myAddress).exec();
   }
+
+  getMyAddress(): string {
+    return this.myAddress;
+  }
 }
