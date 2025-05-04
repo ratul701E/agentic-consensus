@@ -1,0 +1,3 @@
+export enum Programs {
+    "11111111111111111111111111111111" = "TRANSFER_DCL_TOKEN",
+}

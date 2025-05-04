@@ -77,26 +77,6 @@ export class BlockService implements OnModuleInit {
     }
     this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`);
 
-    // if (node_staking_info.length < 2) {
-    //   //TODO UPDATE LOGIC
-    //   this.logger.error(`Result: Failed. Need at least 3 nodes to create block. Found ${node_staking_info.length}`);
-    //   this.logger.error(`❌ BLOCK CREATION ABORTED`);
-    //   return;
-    // }
-
-    return;
-    this.logger.verbose(`✅ All nodes staking info collected. Proceeding to block creation...`);
-
-    node_staking_info.sort((a: NodeInfoDocument, b: NodeInfoDocument) => b.stake - a.stake);
-    const top3Nodes = node_staking_info.slice(0, 3);
-    const randomNodeIndex = Math.floor(Math.random() * top3Nodes.length);
-    const selectedNode = top3Nodes[randomNodeIndex];
-    //console.log("Selected node info: \n", selectedNode)
-
-    if (selectedNode.network_address !== getLocalIp() + process.env.PORT || 3000) return; // checking
-
-    //console.log("Selected Node's Public Key:", selectedNode.public_key);
-
     const blockWithTransactions = {
       blockInfo: {
         blockNumber: last_block.blockInfo.blockNumber + 1,
@@ -105,9 +85,9 @@ export class BlockService implements OnModuleInit {
         blockHash: "",
         previousBlockHash: last_block.blockInfo.blockHash,
         validator: {
-          publicKey: selectedNode.address,
-          stakingBalance: selectedNode.stake,
-          validatorSignature: selectedNode.address,
+          publicKey: my_info.address,
+          stakingBalance: my_info.stake,
+          validatorSignature: my_info.address,
         },
         proofOfStake: {
           stakingReward: 2,
