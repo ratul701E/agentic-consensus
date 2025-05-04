@@ -2,24 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TransactionDTO } from 'src/dtos/transaction.dto';
-import { EC } from 'elliptic';
-import * as elliptic from 'elliptic';
 import { Blockchain } from 'src/schemas/blockchain.schema';
 import { Mempool } from 'src/schemas/mempool.schema';
 import { P2pService } from '../p2p-server/p2p-server.service';
+import { slh_dsa_sha2_256f } from '@noble/post-quantum/slh-dsa';
+import { hexToBytes, utf8ToBytes } from '@noble/hashes/utils';
 
 @Injectable()
 export class TransactionService {
-    private readonly ec: EC;
     private readonly logger = new Logger(TransactionService.name);
 
     constructor(
         private readonly p2pService: P2pService,
         @InjectModel(Blockchain.name) private readonly blockchainModel: Model<Blockchain>,
         @InjectModel(Mempool.name) private readonly mempoolModel: Model<Mempool>
-    ) {
-        this.ec = new elliptic.ec('secp256k1');
-    }
+    ) {}
 
     async transactionExists(transaction: TransactionDTO): Promise<boolean> {
         this.logger.log(`Checking if transaction ${transaction.transactionHash} exists...`);
@@ -66,18 +63,29 @@ export class TransactionService {
         return "Valid Transaction";
     }
 
-    async validateSignature(transaction: TransactionDTO): Promise<boolean> {
-        try {
-            if (!transaction || !transaction.from) {
-                throw new Error('Transaction or sender not found');
-            }
-            const key = this.ec.keyFromPublic(transaction.from, 'hex');
-            return key.verify(transaction.transactionHash, transaction.signature);
-        } catch (error) {
-            console.error('Failed to validate signature:', error);
-            return false;
-        }
-    }
+    // async validateSignature(transaction: TransactionDTO): Promise<boolean> {
+    //     try {
+    //       if (!transaction || !transaction.from || !transaction.signature || !transaction.transaction) {
+    //         throw new Error('Transaction is missing required fields');
+    //       }
+      
+    //       const publicKeyBytes = hexToBytes(transaction.from);
+    //       const signatureBytes = hexToBytes(transaction.signature);
+    //       const messageBytes = utf8ToBytes(transaction.transaction); 
+      
+    //       if (messageBytes.length > 128) {
+    //         throw new Error('Transaction message too long for SLH-DSA');
+    //       }
+      
+    //       const paddedMessage = new Uint8Array(128);
+    //       paddedMessage.set(messageBytes);
+      
+    //       return slh_dsa_sha2_256f.verify(signatureBytes, paddedMessage, publicKeyBytes);
+    //     } catch (error) {
+    //       console.error('Failed to validate SLH-DSA signature:', error);
+    //       return false;
+    //     }
+    //   }
 
     async getBalance(publicKey: string): Promise<number> {
         const blocks = await this.blockchainModel.find().lean().exec();
