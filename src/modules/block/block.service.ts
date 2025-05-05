@@ -48,34 +48,42 @@ export class BlockService implements OnModuleInit {
     if (next_slot_details) this.logger.log(`Slot Leader Address: ${next_slot_details.leaderAddress}`);
 
     if (!next_slot_details || next_slot_details.leaderAddress !== my_info.address) {
-      this.logger.warn("Not leader. Skipping block creation.");
+      if (process.env.SHOW_BLOCK_CEATION_LOG === "true") this.logger.warn("Not leader. Skipping block creation.");
       return;
     }
 
     // this.logger.log(await this.transactionService.printMempool())
     const _mempool: any = await this.transactionService.printMempool();
 
-    // this.logger.log(`Mempool: ${JSON.stringify(_mempool)}`)
+    this.logger.log(`Mempool: ${JSON.stringify(_mempool, null, 2)}`);
 
     const valid_transactions: any = [];
     const last_block: any = await this.blockchainService.getLastBlock();
 
-    for (const transaction of _mempool) {
-      const status = await this.transactionService.validateTransaction(transaction);
-      if (status == "Valid Transaction") {
+    for (const _transaction of _mempool) {
+      const transaction = await this.transactionService.validateTransaction(_transaction);
+      if (transaction) {
         valid_transactions.push(transaction);
       } else {
-        this.logger.warn(`Transaction ${transaction.transactionHash} is invalid. Reason: ${status}`);
+        if (process.env.SHOW_BLOCK_CEATION_LOG === "true")
+          this.logger.warn(
+            `Transaction ${transaction.transactionHash} is invalid. Reason: Invalid Transaction Sturcture`,
+          );
       }
     }
 
+    this.logger.log(JSON.stringify(valid_transactions, null, 2));
+    // return;
+
     if (valid_transactions.length < MINIMUM_TRANSACTION_PER_BLOCK) {
-      this.logger.error(
-        `Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`,
-      );
+      if (process.env.SHOW_BLOCK_CEATION_LOG === "true")
+        this.logger.error(
+          `Result: Failed. Need ${MINIMUM_TRANSACTION_PER_BLOCK} valid transactions found ${valid_transactions.length} (Invalid: ${_mempool.length})`,
+        );
       return;
     }
-    this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`);
+    if (process.env.SHOW_BLOCK_CEATION_LOG === "true")
+      this.logger.log(`Ready for block creation. Valid Trasaction found:  ${valid_transactions.length}`);
 
     const blockWithTransactions = {
       blockInfo: {
@@ -102,14 +110,17 @@ export class BlockService implements OnModuleInit {
       blockWithTransactions.transactions.push(transaction);
     });
 
+
     const merkleRoot = await this.buildMerkleTree(blockWithTransactions.transactions);
     //console.log('Merkle Root:', merkleRoot);
     blockWithTransactions.blockInfo.merkleRoot = merkleRoot;
+    
 
     const blockHash = crypto.createHash("sha256").update(JSON.stringify(blockWithTransactions.blockInfo)).digest("hex");
     //console.log('Block Hash:', blockHash);
 
     blockWithTransactions.blockInfo.blockHash = blockHash;
+
 
     //-------// PRINT
     //console.log(blockWithTransactions)
@@ -124,7 +135,7 @@ export class BlockService implements OnModuleInit {
     this.logger.warn("Mempool cleanup: Cleaning . . .");
     await this.transactionService.deleteMultipleTransactionsFromMempool(valid_transactions);
     this.logger.log("Mempool cleanup: Success");
-
+    return;
     //--------propagate
 
     this.p2pServerGateway.blockBroadcast(blockWithTransactions);

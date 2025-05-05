@@ -66,7 +66,7 @@ export class VdfService {
     }
 
     this.current_clock_tick = currentHash;
-    this.logger.debug(`✅ VDF completed. CURRENT TICK: ${currentHash}`);
+    if(process.env.SHOW_VDF_TICK === "true") this.logger.debug(`✅ VDF completed. CURRENT TICK: ${currentHash}`);
     // return {
     //   initialSeed: this.current_clock_tick,
     //   finalHash: currentHash,

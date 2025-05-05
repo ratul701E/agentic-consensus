@@ -36,7 +36,7 @@ export class EpochService implements OnModuleInit {
 
   @Cron(CronExpression.EVERY_MINUTE, { timeZone: "UTC" }) // CHANGE LATER
   async createEpoch() {
-    this.logger.verbose("Creating new epoch...");
+    if(process.env.SHOW_EPOCH_LOG === "true") this.logger.verbose("Creating new epoch...");
     const lastEpoch = await this.getLastEpoch();
 
     const nodes_information = await this.getCoonectedNodesInfo();
@@ -73,8 +73,9 @@ export class EpochService implements OnModuleInit {
     await newEpoch.save();
     this.currentEpoch = newEpoch;
 
-    this.logger.log("New epoch created!");
-    this.logger.log(`Creating slots for epoch ${newEpoch.epochIndentifier}...`);
+    if (process.env.SHOW_EPOCH_LOG === "true") this.logger.log("New epoch created!");
+    if (process.env.SHOW_EPOCH_LOG === "true")
+      this.logger.log(`Creating slots for epoch ${newEpoch.epochIndentifier}...`);
 
     for (const [slotNumber, leader] of Object.entries(leader_schedule)) {
       const newSlot = new this.slotModel({
@@ -85,9 +86,9 @@ export class EpochService implements OnModuleInit {
       await newSlot.save();
     }
 
-    this.logger.log(`Slots created for epoch ${newEpoch.epochIndentifier}!`);
+    if (process.env.SHOW_EPOCH_LOG === "true") this.logger.log(`Slots created for epoch ${newEpoch.epochIndentifier}!`);
     this.CURRENT_SLOT = 1;
-    this.logger.log(`Current Epoc: ${this.currentEpoch.epochIndentifier}`);
+    if (process.env.SHOW_EPOCH_LOG === "true") this.logger.log(`Current Epoc: ${this.currentEpoch.epochIndentifier}`);
   }
 
   async updateEpochStatus(epoch_id: string, status: EpochStatus): Promise<boolean> {
@@ -167,16 +168,16 @@ export class EpochService implements OnModuleInit {
     const node_staking_info: NodeInfoDocument[] = [await this.infoService.getThisNodeInfo()];
     const node_addresses = this.p2pClientsService.getNodeAddress();
 
-    this.logger.log(node_addresses);
+    if (process.env.SHOW_EPOCH_LOG === "true") this.logger.log(node_addresses);
 
     for (const addr of node_addresses.filter((addr) => addr !== `${getLocalIp()}:${process.env.PORT || 3000}`)) {
       const req_addr = "http://" + addr + "/info";
-      this.logger.verbose(`Requesting ${addr} for staking info`);
+      if (process.env.SHOW_EPOCH_LOG === "true") this.logger.verbose(`Requesting ${addr} for staking info`);
       await axios
         .get(req_addr)
         .then((res) => {
           node_staking_info.push(res.data);
-          console.log(`${addr} staking info: \n`, res.data);
+          if (process.env.SHOW_EPOCH_LOG === "true") console.log(`${addr} staking info: \n`, res.data);
         })
         .catch((error) => console.log(error));
     }

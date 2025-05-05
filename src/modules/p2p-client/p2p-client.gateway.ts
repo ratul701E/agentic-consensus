@@ -27,6 +27,7 @@ export class P2pClientGateway implements OnApplicationBootstrap {
 
   private async connectToSeedServers(): Promise<void> {
     for (const seedAddr of this.p2pClientService.getSeedNodeAddrList()) {
+      this.logger.log(`Connecting to seed server ${seedAddr}...`);
       const seedSocket = io(seedAddr, {
         query: {
           addr: getLocalIp() + ":" + this.PORT,
@@ -52,6 +53,11 @@ export class P2pClientGateway implements OnApplicationBootstrap {
       seedSocket.on("node_info_res", (node_addr_list) => {
         // console.log(node_addr_list);
         this.p2pClientService.addNodeAddresses(node_addr_list);
+        const peers = this.p2pClientService.getNodeAddress();
+        for (const peer of peers) {
+          if (peer == getLocalIp() + ":" + this.PORT) continue; //ignore own server
+          this.connect(peer);
+        }
       });
 
       seedSocket.on("node_disconnected", (id) => {
@@ -71,7 +77,7 @@ export class P2pClientGateway implements OnApplicationBootstrap {
     const socket = io("http://" + addr);
     socket.on("connect", () => {
       this.p2pClientService.addSocket(socket);
-      this.logger.log(`"Connected as a client to ${addr}"`);
+      this.logger.verbose(`"Connected as a client to ${addr}"`);
     });
 
     //#events

@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { HydratedDocument } from "mongoose";
 
 export type MempoolDocument = HydratedDocument<Mempool>;
 
@@ -17,7 +17,7 @@ export class Mempool {
           {
             program_id_index: { type: Number, required: true },
             accounts: { type: [Number], required: true },
-            data: { type: [Number], required: true },
+            data: { type: Number, required: true },
           },
         ],
         required: true,
@@ -31,7 +31,7 @@ export class Mempool {
     instructions: {
       program_id_index: number;
       accounts: number[];
-      data: number[];
+      data: number;
     }[];
   };
 }

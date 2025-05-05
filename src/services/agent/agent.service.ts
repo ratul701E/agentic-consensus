@@ -28,7 +28,7 @@ export class AgentService {
   }
 
   async analyzeSystemPerformance() {
-    this.logger.log("Analyzing system performance...");
+    if(process.env.SHOW_AGENT_PERFORMANCE_ANALYSIS_LOG === "true") this.logger.log("Analyzing system performance...");
     const sysInfo = this.sysInfoService.getSysInfo();
     const res = await this.getSystemReportByAgent(sysInfo);
     const capacityScore = this.extractCapacityScoreV2(res);
@@ -39,7 +39,7 @@ export class AgentService {
         capacityScore,
       });
     }
-    this.logger.verbose(capacityScore);
+    if(process.env.SHOW_AGENT_PERFORMANCE_ANALYSIS_LOG === "true") this.logger.verbose("Capacity Score: ", capacityScore);
     return {};
   }
 

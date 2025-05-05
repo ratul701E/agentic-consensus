@@ -1,4 +1,8 @@
-export function transferDclToken(sender: string, receiver: string, amount: number, availableAmount: number) {
+export function transferDclToken(sender: string, receiver: string, amount: number, availableAmount: number, signature: string) {
+  console.log('Sender:', sender);
+  console.log('Receiver:', receiver);
+  console.log('Amount:', amount);
+  console.log('Available Amount:', availableAmount);
   if (amount > availableAmount) {
     return false;
   }
@@ -12,7 +16,7 @@ export function transferDclToken(sender: string, receiver: string, amount: numbe
     status: "SUCCESS",
     block: 0,
     transactionHash: "",
-    signature: "",
+    signature,
     transactionFee: 0,
     gasPrice: 0,
   };

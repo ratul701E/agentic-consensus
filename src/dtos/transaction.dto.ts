@@ -6,7 +6,7 @@ export class TransactionDTO {
     instructions: {
       program_id_index: number;
       accounts: number[];
-      data: number[];
+      data: number;
     }[];
   };
 }

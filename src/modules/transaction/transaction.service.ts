@@ -2,11 +2,13 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { TransactionDTO } from "src/dtos/transaction.dto";
-import { Blockchain } from "src/schemas/blockchain.schema";
+import { Blockchain, TransactionDocument } from "src/schemas/blockchain.schema";
 import { Mempool } from "src/schemas/mempool.schema";
 import { P2pService } from "../p2p-server/p2p-server.service";
 import { slh_dsa_sha2_256f } from "@noble/post-quantum/slh-dsa";
 import { hexToBytes, utf8ToBytes } from "@noble/hashes/utils";
+import { transferDclToken } from "src/programs/transferDclToken.program";
+import { Programs } from "src/programs/program.enum";
 
 @Injectable()
 export class TransactionService {
@@ -48,11 +50,12 @@ export class TransactionService {
     return result.deletedCount > 0;
   }
 
-  async deleteMultipleTransactionsFromMempool(transactions: TransactionDTO[]): Promise<boolean> {
+  async deleteMultipleTransactionsFromMempool(transactions: TransactionDocument[]) {
+    this.logger.log(`Deleting ${JSON.stringify(transactions, null, 2)} transactions from mempool...`);
     const result = await this.mempoolModel
-      .deleteMany({ transactionHash: { $in: transactions.map((tx) => tx.signatures[0]) } })
+      .deleteMany({ signatures: { $in: transactions.map((tx) => tx.signature) } })
       .exec();
-    return result.deletedCount === transactions.length;
+    // return result.deletedCount === transactions.length;
   }
 
   async printMempool() {
@@ -64,11 +67,17 @@ export class TransactionService {
   //     return balance >= transaction.value + transaction.transactionFee;
   // }
 
-  async validateTransaction(transaction: TransactionDTO): Promise<string> {
-    // TODO: Implement validation logic
-    // if (!await this.validateBalance(transaction)) return "Insufficient Account Balance";
-    // if (!await this.validateSignature(transaction)) return "Unable to Validate Signature";
-    return "Valid Transaction";
+  async validateTransaction(transaction: TransactionDTO): Promise<any> {
+    if (transaction.message.account_keys[2] !== Programs.TRANSFER_DCL_TOKEN) return;
+    const __transaction = transferDclToken(
+      transaction.message.account_keys[0],
+      transaction.message.account_keys[1],
+      transaction.message.instructions[0].data,
+      await this.getBalance(transaction.message.account_keys[0]),
+      transaction.signatures[0],
+    );
+    if (__transaction === false) return null;
+    return __transaction;
   }
 
   // async validateSignature(transaction: TransactionDTO): Promise<boolean> {
