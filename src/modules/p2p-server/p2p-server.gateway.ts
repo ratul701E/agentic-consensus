@@ -84,6 +84,13 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.emit('new_transaction', transaction)
   }
 
+  notifyExplorer() {
+    this.server.emit('notify_explorer', {
+      message: "New block added",
+      time: Date.now()
+    });
+  }
+
 
   blockBroadcast(block:any){
     this.server.emit('new_block', block)
