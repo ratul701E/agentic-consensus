@@ -12,6 +12,7 @@ export class P2pClientService {
     own: getLocalIp() + ":" + this.PORT,
   };
   private sockets: any = [];
+  private connected_peers_addresses: string[] = [];
   private seed_sockets: any = [];
   private readonly seed_servers: string[] = [
     process.env.SEED_SERVER_ADDRESS || "http://192.168.31.202:4000",
@@ -88,5 +89,22 @@ export class P2pClientService {
 
   getSeedSocketList(): any[] {
     return this.seed_sockets;
+  }
+
+  addConnectedPeerAddress(address: string): void {
+    if (!this.connected_peers_addresses.includes(address)) {
+      this.connected_peers_addresses.push(address);
+    }
+  }
+
+  removeConnectedPeerAddress(address: string): void {
+    const index = this.connected_peers_addresses.indexOf(address);
+    if (index > -1) {
+      this.connected_peers_addresses.splice(index, 1);
+    }
+  }
+
+  isPeerConnected(address: string): boolean {
+    return this.connected_peers_addresses.includes(address);
   }
 }

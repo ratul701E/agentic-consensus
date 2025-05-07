@@ -55,6 +55,20 @@ import { RedisServiceModule } from './services/redis-service/redis-service.modul
       connection: {
         host: process.env.REDIS_HOST || 'localhost',
         port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
+        retryStrategy: (times: number) => {
+          const delay = Math.min(Math.pow(2, times) * 1000, 30000);
+          console.log(`Redis connection attempt ${times + 1} failed. Retrying in ${delay}ms...`);
+          return delay;
+        },
+        maxRetriesPerRequest: 5,
+        enableReadyCheck: true,
+        reconnectOnError: (err: Error) => {
+          const targetError = 'READONLY';
+          if (err.message.includes(targetError)) {
+            return true;
+          }
+          return false;
+        }
       }
     }),
     RedisServiceModule

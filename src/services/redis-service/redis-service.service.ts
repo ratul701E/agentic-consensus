@@ -16,11 +16,11 @@ export class RedisServiceService implements OnModuleInit {
         this.logger.log("Redis connection is ready.");
       });
 
-      client.on("error", (error) => {
-        this.logger.error("Redis connection error:", error);
+      client.on("error", () => {
+        this.logger.error("Redis connection error");
       });
     } catch (err) {
-      this.logger.error("Failed to get Redis client:", err);
+      this.logger.error("Failed to get Redis client");
     }
   }
 }

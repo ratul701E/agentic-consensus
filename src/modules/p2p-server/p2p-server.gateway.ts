@@ -1,23 +1,27 @@
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { TransactionDTO } from 'src/dtos/transaction.dto';
-import { BlockDTO } from 'src/dtos/block.dto';
-import { Logger } from '@nestjs/common';
-
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from "@nestjs/websockets";
+import { Server } from "socket.io";
+import { TransactionDTO } from "src/dtos/transaction.dto";
+import { BlockDTO } from "src/dtos/block.dto";
+import { Logger } from "@nestjs/common";
 
 @WebSocketGateway()
-
 export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-
   private readonly logger = new Logger(P2pGateway.name);
 
-  constructor(){}
+  constructor() {}
 
   @WebSocketServer() server: Server;
 
   getSocketsCount(): number {
-    const { sockets } = this.server.sockets
-    return sockets.size
+    const { sockets } = this.server.sockets;
+    return sockets.size;
   }
 
   afterInit(server: any) {
@@ -25,19 +29,19 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   handleConnection(client: any, ...args: any[]) {
-    this.logger.log("NEW NODE! connected: ", this.getSocketsCount())
+    this.logger.log(`NEW NODE! connected as client: ${this.getSocketsCount()}`);
     //client.broadcast.emit('new_node_connect', `A new node (${client.id}) just connected to the server`)
 
     // console.log(`User: ${client.id} \n\r
     //              Status: Connected\n\r
     //              Room: ${client.room}\n\r
     //              Total users: ${this.getSocketsCount()}
-    
+
     //             `)
   }
 
   handleDisconnect(client: any) {
-    this.logger.warn("NODE LEAVE! connected: ", this.getSocketsCount())
+    this.logger.warn(`NODE LEAVE! disconnected: ${this.getSocketsCount()}`);
     //client.broadcast.emit('node_disconnect', `A node (${client.id}) just disconnected`)
     // client.broadcast.emit('greet', {
     //   id: client.id,
@@ -50,13 +54,12 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     //              Status: Disonnected\n\r
     //              Room: ${client.room}\n\r
     //              Total users: ${this.getSocketsCount()}
-    
-    //             `)
 
+    //             `)
   }
 
-  @SubscribeMessage('new_transaction')
-  async handlNewTransaction(client: any, transaction: TransactionDTO) : Promise<void | string> {
+  @SubscribeMessage("new_transaction")
+  async handlNewTransaction(client: any, transaction: TransactionDTO): Promise<void | string> {
     this.logger.log("Receive via peer node: ", transaction);
     //let status = await this.p2pService.validateTransaction(transaction)
 
@@ -68,34 +71,30 @@ export class P2pGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     // else {
     //   return "Failed to add into mempool. [errors here .....]"
     // }
-    
   }
 
-  @SubscribeMessage('new_block')
-  async handleNewBlock(client: any, block: BlockDTO) : Promise<void> {
+  @SubscribeMessage("new_block")
+  async handleNewBlock(client: any, block: BlockDTO): Promise<void> {
     //validate block
     //add block
 
     //broadcast
-    client.broadcast.emit('new_block', block)
+    client.broadcast.emit("new_block", block);
   }
 
   transactionBroadcast(transaction: TransactionDTO) {
-    this.server.emit('new_transaction', transaction)
+    this.server.emit("new_transaction", transaction);
   }
 
   notifyExplorer() {
-    this.server.emit('notify_explorer', {
+    this.server.emit("notify_explorer", {
       message: "New block added",
-      time: Date.now()
+      time: Date.now(),
     });
   }
 
-
-  blockBroadcast(block:any){
-    this.server.emit('new_block', block)
-    console.log("block broadcasted")
+  blockBroadcast(block: any) {
+    this.server.emit("new_block", block);
+    console.log("block broadcasted");
   }
-
-
 }

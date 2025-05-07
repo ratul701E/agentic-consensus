@@ -48,7 +48,7 @@ export class BlockService implements OnModuleInit {
     if (next_slot_details) this.logger.log(`Slot Leader Address: ${next_slot_details.leaderAddress}`);
 
     if (!next_slot_details || next_slot_details.leaderAddress !== my_info.address) {
-      if (process.env.SHOW_BLOCK_CEATION_LOG === "true") this.logger.warn("Not leader. Skipping block creation.");
+      if (process.env.SHOW_BLOCK_CREATION_LOG === "true") this.logger.warn("Not the slot leader. Skipping block creation.");
       return;
     }
 
@@ -135,11 +135,10 @@ export class BlockService implements OnModuleInit {
     this.logger.warn("Mempool cleanup: Cleaning . . .");
     await this.transactionService.deleteMultipleTransactionsFromMempool(valid_transactions);
     this.logger.log("Mempool cleanup: Success");
-    return;
-    //--------propagate
 
+    //--------propagate block to peers
     this.p2pServerGateway.blockBroadcast(blockWithTransactions);
-    this.logger.log("Broadcast: Successfully broadcasted to peers");
+    this.logger.verbose("Broadcast: Successfully broadcasted to peers");
   }
 
   async buildMerkleTree(transactions) {

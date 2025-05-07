@@ -7,6 +7,8 @@ import { TransactionService } from "src/modules/transaction/transaction.service"
 import { TransactionDTO } from "src/dtos/transaction.dto";
 import { Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { InternalEventEmitterService } from "src/services/internal-event-emitter/internal-event-emitter.service";
+import { BlockchainService } from "../blockchain/blockchain.service";
+import { TransactionDocument } from "src/schemas/blockchain.schema";
 
 @WebSocketGateway()
 export class P2pClientGateway implements OnApplicationBootstrap {
@@ -18,6 +20,7 @@ export class P2pClientGateway implements OnApplicationBootstrap {
     private readonly p2pClientService: P2pClientService,
     private readonly transacationService: TransactionService,
     private readonly internalEventEmitterService: InternalEventEmitterService,
+    private readonly blockchainService: BlockchainService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -73,16 +76,19 @@ export class P2pClientGateway implements OnApplicationBootstrap {
   }
 
   private connect(addr: string) {
+    if(this.p2pClientService.isPeerConnected(addr)) return;
     //connect to other servers as peer
     const socket = io("http://" + addr);
     socket.on("connect", () => {
       this.p2pClientService.addSocket(socket);
+      this.p2pClientService.addConnectedPeerAddress(addr);
       this.logger.verbose(`"Connected as a client to ${addr}"`);
     });
 
     //#events
     socket.on("disconnect", () => {
       this.logger.warn(`"Disconnected as a client from ${addr}"`);
+      this.p2pClientService.removeFromActiveNodeList(addr);
     });
 
     //new transaction event
@@ -93,19 +99,22 @@ export class P2pClientGateway implements OnApplicationBootstrap {
       //validate
       //add
       (await this.transacationService.addTransactionToMempool(transaction))
-        ? console.log("Transaction successfully added to mempool")
-        : console.log("Transaction already exists in the mepool");
+        ? this.logger.debug("Transaction successfully added to mempool")
+        : this.logger.warn("Transaction already exists in the mepool");
       //broadcast
       //this.server.emit('new_transaction', transaction) //broadcast
     });
 
     //new block event
     socket.on("new_block", async (block: any) => {
-      this.logger.log(`Received block from server (${JSON.stringify(addr)}): ${JSON.parse(JSON.stringify(block))}`);
-      //validate
-      //add
+      this.logger.log(`Received block from server (${JSON.stringify(addr)}): ${JSON.stringify(block, null, 2)}`);
+      await this.blockchainService.addToBlockchain(block);
+      this.logger.verbose("Block verification: Success. Added to blockchain");
 
-      //broadcast
+      const transactionsInBlock: TransactionDocument[] = block.transactions;
+
+      await this.transacationService.deleteMultipleTransactionsFromMempool(transactionsInBlock);
+      this.logger.verbose("Mempool cleanup: Success");
       //this.server.emit('new_block', block)
     });
 
