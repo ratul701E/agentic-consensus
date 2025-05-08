@@ -92,9 +92,18 @@ export class P2pClientGateway implements OnApplicationBootstrap {
       this.logger.verbose(`"Connected as a client to ${addr}"`);
       const res = axios.get("http://" + addr + "/blockchain");
       res.then(async (res) => {
-        await this.blockchainModel.deleteMany({});
-        await this.blockchainModel.insertMany(res.data);
-        this.logger.verbose("Blockchain data successfully synced from peers");
+        // Get existing block hashes from blockchain
+        const existingBlocks = await this.blockchainModel.find();
+        const existingBlockHashes = new Set(existingBlocks.map((block) => block.blockInfo.blockHash));
+
+        // Filter and insert only new blocks
+        const newBlocks = res.data.filter((block) => !existingBlockHashes.has(block.blockHash));
+        if (newBlocks.length > 0) {
+          await this.blockchainModel.insertMany(newBlocks);
+          this.logger.verbose(`${newBlocks.length} new blocks synced from peers`);
+        } else {
+          this.logger.verbose("No new blocks to sync from peers");
+        }
       });
     });
 
