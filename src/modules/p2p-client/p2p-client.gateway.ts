@@ -31,6 +31,7 @@ export class P2pClientGateway implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.connectToSeedServers();
+    await this.blockchainModel.deleteMany();
     //await this.getNodeAddressFromSeedServer()
   }
 
