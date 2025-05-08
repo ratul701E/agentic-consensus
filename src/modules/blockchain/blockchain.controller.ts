@@ -39,7 +39,7 @@ export class BlockchainController {
                         "timestamp": new Date(),
                         "transactionAction": "Transfer 10 DCL value to 0413c725274b4709b5faef702e0e91241eefca047a041561ce1d02e7e397fbe665de7f332c4799203770b16958f5e9989c3f11f0ae352588a75f440b891dc990b0",
                         "from": "Chain",
-                        "to": "04ae7aca61c23b5096ffd40d4ec86cf4e6e6f4ec75abf7478d4824d03a1c9af27febb3d53f110ebfa125ab972bf7b460f64ed1fb3353fdb479a05c2d3edcde0c22",
+                        "to": "2e388b0fd73263b1388749603518708c9ec71ab25b53bb0a747f4513662e6701e48c4ff720b019fe18472f5966a906683822a697f3f5b51d11927b074b2caef7",
                         "value": 1000,
                         "transactionFee": 0,
                         "gasPrice": 0,
