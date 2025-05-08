@@ -90,25 +90,25 @@ export class P2pClientGateway implements OnApplicationBootstrap {
       this.p2pClientService.addSocket(socket);
       this.p2pClientService.addConnectedPeerAddress(addr);
       this.logger.verbose(`"Connected as a client to ${addr}"`);
-      const res = axios.get("http://" + addr + "/blockchain");
-      res.then(async (res) => {
-        // Get existing block hashes from blockchain
-        const existingBlocks = await this.blockchainModel.find();
-        const existingBlockHashes = new Set(existingBlocks.map((block) => block.blockInfo.blockHash));
-
-        // Filter and insert only new blocks
-        const newBlocks = res.data.filter((block) => !existingBlockHashes.has(block.blockHash));
-        if (newBlocks.length > 0) {
-          const blocksToInsert = newBlocks.map((block) => {
-            const { _id, ...blockWithoutId } = block;
-            return blockWithoutId;
-          });
-          await this.blockchainModel.insertMany(blocksToInsert);
-          this.logger.verbose(`${newBlocks.length} new blocks synced from peers`);
-        } else {
-          this.logger.verbose("No new blocks to sync from peers");
-        }
-      });
+      // const res = axios.get("http://" + addr + "/blockchain");
+      // res.then(async (res) => {
+      //   // Get existing block hashes from blockchain
+      //   const existingBlocks = await this.blockchainModel.find();
+      //   const existingBlockHashes = new Set(existingBlocks.map((block) => block.blockInfo.blockHash));
+      //   this.logger.verbose("Existing block hashes: " + existingBlockHashes);
+      //   // Filter and insert only new blocks
+      //   const newBlocks = res.data.filter((block) => !existingBlockHashes.has(block.blockHash));
+      //   if (newBlocks.length > 0) {
+      //     const blocksToInsert = newBlocks.map((block) => {
+      //       const { _id, ...blockWithoutId } = block;
+      //       return blockWithoutId;
+      //     });
+      //     await this.blockchainModel.insertMany(blocksToInsert);
+      //     this.logger.verbose(`${newBlocks.length} new blocks synced from peers`);
+      //   } else {
+      //     this.logger.verbose("No new blocks to sync from peers");
+      //   }
+      // });
     });
 
     //#events
