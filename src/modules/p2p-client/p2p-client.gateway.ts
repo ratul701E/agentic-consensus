@@ -8,8 +8,11 @@ import { TransactionDTO } from "src/dtos/transaction.dto";
 import { Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { InternalEventEmitterService } from "src/services/internal-event-emitter/internal-event-emitter.service";
 import { BlockchainService } from "../blockchain/blockchain.service";
-import { TransactionDocument } from "src/schemas/blockchain.schema";
+import { Blockchain, TransactionDocument } from "src/schemas/blockchain.schema";
 import { P2pService } from "../p2p-server/p2p-server.service";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import axios from "axios";
 
 @WebSocketGateway()
 export class P2pClientGateway implements OnApplicationBootstrap {
@@ -22,7 +25,8 @@ export class P2pClientGateway implements OnApplicationBootstrap {
     private readonly transacationService: TransactionService,
     private readonly internalEventEmitterService: InternalEventEmitterService,
     private readonly blockchainService: BlockchainService,
-    private readonly p2pServerService: P2pService
+    private readonly p2pServerService: P2pService,
+    @InjectModel(Blockchain.name) private readonly blockchainModel: Model<Blockchain>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -43,6 +47,7 @@ export class P2pClientGateway implements OnApplicationBootstrap {
         this.p2pClientService.addSeedSocket(seedSocket);
         await this.getNodeAddressFromSeedServer(seedSocket);
         this.logger.log(`Connected to seed server [${JSON.stringify(seedAddr)}]`);
+
         this.internalEventEmitterService.emit("seed_connected", { seedAddr });
       });
 
@@ -78,13 +83,19 @@ export class P2pClientGateway implements OnApplicationBootstrap {
   }
 
   private connect(addr: string) {
-    if(this.p2pClientService.isPeerConnected(addr)) return;
+    if (this.p2pClientService.isPeerConnected(addr)) return;
     //connect to other servers as peer
     const socket = io("http://" + addr);
     socket.on("connect", () => {
       this.p2pClientService.addSocket(socket);
       this.p2pClientService.addConnectedPeerAddress(addr);
       this.logger.verbose(`"Connected as a client to ${addr}"`);
+      const res = axios.get("http://" + addr + "/blockchain");
+      res.then(async (res) => {
+        await this.blockchainModel.deleteMany({});
+        await this.blockchainModel.insertMany(res.data);
+        this.logger.verbose("Blockchain data successfully synced from peers");
+      });
     });
 
     //#events
@@ -113,7 +124,6 @@ export class P2pClientGateway implements OnApplicationBootstrap {
       await this.blockchainService.addToBlockchain(block);
       this.logger.verbose("Block verification: Success. Added to blockchain");
       this.p2pServerService.notifyExplorer();
-      
 
       const transactionsInBlock: TransactionDocument[] = block.transactions;
 

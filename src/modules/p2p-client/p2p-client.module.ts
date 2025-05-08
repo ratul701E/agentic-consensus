@@ -5,10 +5,18 @@ import { TransactionModule } from "src/modules/transaction/transaction.module";
 import { InternalEventEmitterModule } from "src/services/internal-event-emitter/internal-event-emitter.module";
 import { BlockchainModule } from "../blockchain/blockchain.module";
 import { P2pServerModule } from "../p2p-server/p2p-server.module";
+import { MongooseModule } from "@nestjs/mongoose";
+import { Blockchain, BlockchainSchema } from "src/schemas/blockchain.schema";
 
 @Module({
   providers: [P2pClientGateway, P2pClientService],
-  imports: [TransactionModule, InternalEventEmitterModule, BlockchainModule, P2pServerModule],
+  imports: [
+    TransactionModule,
+    InternalEventEmitterModule,
+    BlockchainModule,
+    P2pServerModule,
+    MongooseModule.forFeature([{ name: Blockchain.name, schema: BlockchainSchema }]),
+  ],
   exports: [P2pClientService],
 })
 export class P2pClientModule {}

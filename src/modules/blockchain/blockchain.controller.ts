@@ -25,7 +25,7 @@ export class BlockchainController {
                     previousBlockHash: "null",
                     validator: {
                         publicKey: "Chain",
-                        stakingBalance: 'null',
+                        stakingBalance: 0,
                         validatorSignature: 'null',
                     },
                     proofOfStake: {
@@ -43,7 +43,6 @@ export class BlockchainController {
                         "value": 1000,
                         "transactionFee": 0,
                         "gasPrice": 0,
-                        "transactionHash": "69f67a93c0bbf76b7f0e924206bf25c6b2ad1af68e1c84a4d8c6eb6e2fdd024a",
                         "signature": "0000000000000000000"
                     },
                     {
@@ -56,7 +55,6 @@ export class BlockchainController {
                         "value": 1000,
                         "transactionFee": 0,
                         "gasPrice": 0,
-                        "transactionHash": "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b232f0d2edfb7dba3",
                         "signature": "0000000000000000000"
                     }
                 ],
