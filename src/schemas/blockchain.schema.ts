@@ -76,9 +76,6 @@ class Transaction {
   gasPrice: number;
 
   @Prop({ required: true })
-  transactionHash: string;
-
-  @Prop({ required: true })
   signature: string;
 }
 

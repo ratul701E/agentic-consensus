@@ -122,7 +122,7 @@ export class TransactionService {
     const block = await this.blockchainModel.findOne({ "transactions.transactionHash": transactionHash }).lean().exec();
     if (!block) throw new Error(`Transaction with hash ${transactionHash} not found`);
 
-    return block.transactions.find((tx) => tx.transactionHash === transactionHash);
+    return block.transactions.find((tx) => tx.signature === transactionHash);
   }
 
   async getAllTransactionByPublicKey(publicKey: string): Promise<any[]> {
