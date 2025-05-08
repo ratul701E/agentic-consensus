@@ -4,10 +4,11 @@ import { P2pClientGateway } from "./p2p-client.gateway";
 import { TransactionModule } from "src/modules/transaction/transaction.module";
 import { InternalEventEmitterModule } from "src/services/internal-event-emitter/internal-event-emitter.module";
 import { BlockchainModule } from "../blockchain/blockchain.module";
+import { P2pServerModule } from "../p2p-server/p2p-server.module";
 
 @Module({
   providers: [P2pClientGateway, P2pClientService],
-  imports: [TransactionModule, InternalEventEmitterModule, BlockchainModule],
+  imports: [TransactionModule, InternalEventEmitterModule, BlockchainModule, P2pServerModule],
   exports: [P2pClientService],
 })
 export class P2pClientModule {}

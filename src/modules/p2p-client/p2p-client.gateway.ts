@@ -9,6 +9,7 @@ import { Logger, OnApplicationBootstrap } from "@nestjs/common";
 import { InternalEventEmitterService } from "src/services/internal-event-emitter/internal-event-emitter.service";
 import { BlockchainService } from "../blockchain/blockchain.service";
 import { TransactionDocument } from "src/schemas/blockchain.schema";
+import { P2pService } from "../p2p-server/p2p-server.service";
 
 @WebSocketGateway()
 export class P2pClientGateway implements OnApplicationBootstrap {
@@ -21,6 +22,7 @@ export class P2pClientGateway implements OnApplicationBootstrap {
     private readonly transacationService: TransactionService,
     private readonly internalEventEmitterService: InternalEventEmitterService,
     private readonly blockchainService: BlockchainService,
+    private readonly p2pServerService: P2pService
   ) {}
 
   async onApplicationBootstrap() {
@@ -110,6 +112,8 @@ export class P2pClientGateway implements OnApplicationBootstrap {
       this.logger.log(`Received block from server (${JSON.stringify(addr)}): ${JSON.stringify(block, null, 2)}`);
       await this.blockchainService.addToBlockchain(block);
       this.logger.verbose("Block verification: Success. Added to blockchain");
+      this.p2pServerService.notifyExplorer();
+      
 
       const transactionsInBlock: TransactionDocument[] = block.transactions;
 
