@@ -139,6 +139,7 @@ export class BlockService implements OnModuleInit {
     //--------propagate block to peers
     this.p2pServerGateway.blockBroadcast(blockWithTransactions);
     this.logger.verbose("Broadcast: Successfully broadcasted to peers");
+    this.p2pServerGateway.notifyExplorer();
   }
 
   async buildMerkleTree(transactions) {

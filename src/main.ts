@@ -7,7 +7,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new CustomLogger(),
   });
-  app.enableCors();
+  app.enableCors({
+    origin: "*",
+  });
   const PORT = process.env.PORT || 3000;
   try {
     await app.listen(PORT, getLocalIp());
