@@ -99,7 +99,11 @@ export class P2pClientGateway implements OnApplicationBootstrap {
         // Filter and insert only new blocks
         const newBlocks = res.data.filter((block) => !existingBlockHashes.has(block.blockHash));
         if (newBlocks.length > 0) {
-          await this.blockchainModel.insertMany(newBlocks);
+          const blocksToInsert = newBlocks.map((block) => {
+            const { _id, ...blockWithoutId } = block;
+            return blockWithoutId;
+          });
+          await this.blockchainModel.insertMany(blocksToInsert);
           this.logger.verbose(`${newBlocks.length} new blocks synced from peers`);
         } else {
           this.logger.verbose("No new blocks to sync from peers");
